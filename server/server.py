@@ -1,228 +1,157 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import json
 import os
 import mimetypes
-from urllib.parse import urlparse, parse_qs
-from database import Database
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse
 
-class APIHandler(BaseHTTPRequestHandler):
+# Importa o router já com as rotas registradas
+from routes import router, db
 
-    CLIENT_DIR = os.path.join(os.path.dirname(__file__), '..', 'client')
-    
-    def __init__(self, *args, **kwargs):
-        self.db = Database()
-        super().__init__(*args, **kwargs)
-    
-    def _set_headers(self, status=200, content_type='application/json'):
-        self.send_response(status)
-        self.send_header('Content-type', content_type)
+# Pasta raiz dos arquivos estáticos (HTML, CSS, JS)
+CLIENT_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'client')
+)
+
+# Mapeamento de paths "amigáveis" → arquivo HTML
+PAGE_ALIASES = {
+    '/':           'pages/index.html',
+    '/servicos':   'pages/service.html',
+    '/tutores':    'pages/tutores.html',
+    '/animais':    'pages/animais.html',
+    '/agendamento':'pages/agendamento.html',
+}
+
+
+class PetShopHandler(BaseHTTPRequestHandler):
+
+    # ── CORS preflight ────────────────────────────────────────────────────────
+
+    def do_OPTIONS(self):
+        self.send_response(204)
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        self.send_header('Access-Control-Allow-Methods',
+                         'GET, POST, PUT, DELETE, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
-    
-    def _send_json(self, data, status=200):
-        self._set_headers(status)
-        self.wfile.write(json.dumps(data).encode('utf-8'))
-    
-    def _send_error(self, message, status=400):
-        self._send_json({'error': message}, status)
-    
-    def _serve_file(self, filepath):
+
+    # ── Despacho geral ────────────────────────────────────────────────────────
+
+    def _dispatch(self):
+        parsed = urlparse(self.path)
+        path   = parsed.path
+
+        # 1) Tenta resolver como rota de API
+        if path.startswith('/api/'):
+            handled = router.dispatch(self)
+            if not handled:
+                self._send_json({'error': 'Rota não encontrada'}, 404)
+            return
+
+        # 2) Resolve aliases de páginas (/tutores → tutores.html)
+        filename = PAGE_ALIASES.get(path)
+        if filename:
+            self._serve_file(os.path.join(CLIENT_DIR, filename))
+            return
+
+        # 3) Serve arquivo estático diretamente
+        file_path = os.path.normpath(
+            os.path.join(CLIENT_DIR, path.lstrip('/'))
+        )
+
+        # Proteção contra path traversal
+        if not file_path.startswith(os.path.abspath(CLIENT_DIR)):
+            self._send_error_html('Acesso negado', 403)
+            return
+
+        if os.path.isdir(file_path):
+            file_path = os.path.join(file_path, 'index.html')
+
+        self._serve_file(file_path)
+
+    do_GET    = _dispatch
+    do_POST   = _dispatch
+    do_PUT    = _dispatch
+    do_DELETE = _dispatch
+
+    # ── Utilitários de resposta ───────────────────────────────────────────────
+
+    def _send_json(self, data: dict, status: int = 200):
+        import json
+        body = json.dumps(data, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _serve_file(self, filepath: str):
+        mime_type, _ = mimetypes.guess_type(filepath)
+        mime_type = mime_type or 'application/octet-stream'
         try:
-            mime_type, _ = mimetypes.guess_type(filepath)
-            if mime_type is None:
-                mime_type = 'application/octet-stream'
-            
             with open(filepath, 'rb') as f:
                 content = f.read()
-                self._set_headers(content_type=mime_type)
-                self.wfile.write(content)
+            self.send_response(200)
+            self.send_header('Content-Type', mime_type)
+            self.send_header('Content-Length', len(content))
+            self.end_headers()
+            self.wfile.write(content)
         except FileNotFoundError:
-            self._set_headers(404, 'text/html')
-            self.wfile.write(b'<h1>404 - Arquivo nao encontrado</h1>')
+            self._send_error_html(f'Arquivo não encontrado: {filepath}', 404)
         except Exception as e:
-            self._set_headers(500, 'text/html')
-            self.wfile.write(f'<h1>500 - Erro interno: {str(e)}</h1>'.encode())
-    
-    def do_OPTIONS(self):
-        self._set_headers()
-    
-    def do_GET(self):
-        parsed_path = urlparse(self.path)
-        path = parsed_path.path
-        
-        if path == '/api/usuarios':
-            usuarios = self.db.get_all_users()
-            self._send_json({'usuarios': usuarios})
+            self._send_error_html(f'Erro interno: {e}', 500)
 
-        elif path == '/api/pets':
+    def _send_error_html(self, msg: str, status: int):
+        body = f'<h1>{status} – {msg}</h1>'.encode()
+        self.send_response(status)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(body)
 
-            usuarios = self.db.get_all_users()
-            self._send_json({'pets': usuarios})
-            
-        elif path.startswith('/api/pets/'):
-            user_id = path.split('/')[-1]
-            try:
-                user_id = int(user_id)
-                usuario = self.db.get_user_by_id(user_id)
-
-                if usuario:
-                    self._send_json({'usuario': usuario})
-                else:
-                    self._send_error('Usuário não encontrado', 404)
-            except ValueError:
-                self._send_error('ID inválido', 400)
-        else:
-            if path == '/':
-                path = '/index.html'
-            
-            file_path = os.path.normpath(os.path.join(self.CLIENT_DIR, path.lstrip('/')))
-            
-            if not file_path.startswith(os.path.abspath(self.CLIENT_DIR)):
-                self._send_error('Acesso negado', 403)
-                return
-            
-            if os.path.isdir(file_path):
-                file_path = os.path.join(file_path, 'index.html')
-            
-            self._serve_file(file_path)
-    
-    def do_POST(self):
-        parsed_path = urlparse(self.path)
-        path = parsed_path.path
-        
-        if path == '/api/usuarios':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
-            try:
-                data = json.loads(post_data.decode('utf-8'))
-                nome = data.get('nome')
-                email = data.get('email')
-                
-                if not nome or not email:
-                    self._send_error('Nome e email são obrigatórios', 400)
-                    return
-                
-                user_id = self.db.create_user(nome, email)
-                self._send_json({'id': user_id, 'message': 'Usuário criado com sucesso'}, 201)
-                
-            except json.JSONDecodeError:
-                self._send_error('JSON inválido', 400)
-            except Exception as e:
-                self._send_error(f'Erro ao criar usuário: {str(e)}', 500)
-
-        elif path == '/api/pets':
-
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
-            try:
-                data = json.loads(post_data.decode('utf-8'))
-                nome = data.get('nome')
-                email = data.get('email')
-                telefone = data.get('telefone1')
-                endereco = data.get('endereco')
-                bairro = data.get('bairro')
-                cidade = data.get('cidade')
-                estado = data.get('estado')
-                
-                if not nome or not email:
-                    self._send_error('Nome e email são obrigatórios', 400)
-                    return
-                
-                user_id = self.db.create_pets(nome, email, telefone, endereco, bairro, cidade, estado)
-                self._send_json({'id': user_id, 'message': 'Usuário criado com sucesso'}, 201)
-                
-            except json.JSONDecodeError:
-                self._send_error('JSON inválido', 400)
-            except Exception as e:
-                self._send_error(f'Erro ao criar PET: {str(e)}', 500)
-
-        else:
-            self._send_error('Endpoint não encontrado', 404)
-    
-    def do_PUT(self):
-        parsed_path = urlparse(self.path)
-        path = parsed_path.path
-        
-        if path.startswith('/api/pets/'):
-            user_id = path.split('/')[-1]
-            
-            try:
-                user_id = int(user_id)
-                content_length = int(self.headers['Content-Length'])
-                put_data = self.rfile.read(content_length)
-                data = json.loads(put_data.decode('utf-8'))
-                
-                nome = data.get('nome')
-                email = data.get('email')
-                telefone = data.get('telefone1')
-                endereco = data.get('endereco')
-                bairro = data.get('bairro')
-                cidade = data.get('cidade')
-                estado = data.get('estado')
-                
-                if not nome or not email:
-                    self._send_error('Nome e email são obrigatórios', 400)
-                    return
-                
-                success = self.db.update_pets(user_id, nome, email, telefone, endereco, bairro, cidade, estado)
-                
-                if success:
-                    self._send_json({'message': 'Usuário atualizado com sucesso'})
-                else:
-                    self._send_error('Usuário não encontrado', 404)
-                    
-            except ValueError:
-                self._send_error('ID inválido', 400)
-            except json.JSONDecodeError:
-                self._send_error('JSON inválido', 400)
-            except Exception as e:
-                self._send_error(f'Erro ao atualizar usuário: {str(e)}', 500)
-        else:
-            self._send_error('Endpoint não encontrado', 404)
-    
-    def do_DELETE(self):
-        parsed_path = urlparse(self.path)
-        path = parsed_path.path
-        
-        if path.startswith('/api/usuarios/'):
-            user_id = path.split('/')[-1]
-            
-            try:
-                user_id = int(user_id)
-                success = self.db.delete_user(user_id)
-                
-                if success:
-                    self._send_json({'message': 'Usuário deletado com sucesso'})
-                else:
-                    self._send_error('Usuário não encontrado', 404)
-                    
-            except ValueError:
-                self._send_error('ID inválido', 400)
-            except Exception as e:
-                self._send_error(f'Erro ao deletar usuário: {str(e)}', 500)
-        else:
-            self._send_error('Endpoint não encontrado', 404)
-    
-    def log_message(self, format, *args):
-        print(f"{self.address_string()} - [{self.log_date_time_string()}] {format % args}")
+    def log_message(self, fmt, *args):
+        """Log colorido no terminal."""
+        method = args[0].split()[0] if args else ''
+        colors = {
+            'GET': '\033[94m', 'POST': '\033[92m',
+            'PUT': '\033[93m', 'DELETE': '\033[91m',
+        }
+        c = colors.get(method, '')
+        reset = '\033[0m'
+        print(f"  {c}{fmt % args}{reset}  [{self.log_date_time_string()}]")
 
 
-def run_server(host='localhost', port=8000):
-    server_address = (host, port)
-    httpd = HTTPServer(server_address, APIHandler)
-    print(f'Servidor rodando em http://{host}:{port}')
-    print('Pressione Ctrl+C para parar')
-    
+# ─────────────────────────────────────────────────────────────────────────────
+# INICIALIZAÇÃO
+# ─────────────────────────────────────────────────────────────────────────────
+
+def run():
+    host = os.getenv('HOST', 'localhost')
+    port = int(os.getenv('PORT', 8000))
+
+    print('\n🐾  PataFeliz PetShop – iniciando...')
+
+    # Cria tabelas se não existirem
+    db.setup()
+
+    # Rotas registradas
+    print('\n📋  Rotas da API:')
+    for method, pattern, _, fn in router._routes:
+        color = {
+            'GET': '\033[94m', 'POST': '\033[92m',
+            'PUT': '\033[93m', 'DELETE': '\033[91m',
+        }.get(method, '')
+        print(f"   {color}{method:7}\033[0m {pattern.pattern}  →  {fn.__name__}")
+
+    httpd = HTTPServer((host, port), PetShopHandler)
+    print(f'\n🚀  Servidor rodando em http://{host}:{port}')
+    print(f'📁  Arquivos estáticos: {CLIENT_DIR}')
+    print('     Pressione Ctrl+C para parar\n')
+
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print('\nServidor encerrado')
+        print('\n\n🛑  Servidor encerrado.')
+        db.close()
         httpd.shutdown()
 
 
 if __name__ == '__main__':
-    run_server()
+    run()

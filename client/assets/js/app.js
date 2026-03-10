@@ -72,7 +72,7 @@ function displayUsers(usuarios) {
     }
     
     usersList.innerHTML = usuarios.map(user => `
-        <div class="user-card" data-id="${user.id_tutor}">
+        <div class="user-card" data-id="${user.id}">
             <div class="user-info">
                 <h3>${escapeHtml(user.nome)}</h3>
                 <p>✉️ ${escapeHtml(user.email)}</p>
@@ -83,10 +83,10 @@ function displayUsers(usuarios) {
                 <p class="user-date">📅 Criado em: ${formatDate(user.criado_em)}</p>
             </div>
             <div class="user-actions">
-                <button class="btn btn-edit" onclick="editUser(${user.id_tutor})">
+                <button class="btn btn-edit" onclick="editUser(${user.id})">
                     ✏️ Editar
                 </button>
-                <button class="btn btn-delete" onclick="deleteUser(${user.id_tutor})">
+                <button class="btn btn-delete" onclick="deleteUser(${user.id})">
                     🗑️ Deletar
                 </button>
             </div>
@@ -203,9 +203,9 @@ async function editUser(id) {
         bairroInput.value = user.bairro
         cidadeInput.value = user.cidade
         estadoInput.value = user.estado
-        userIdInput.value = user.id_tutor;
+        userIdInput.value = user.id;
         
-        editingUserId = user.id_tutor;
+        editingUserId = user.id;
         
         // Atualizar UI
         submitBtn.textContent = 'Atualizar Usuário';

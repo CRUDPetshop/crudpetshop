@@ -1,86 +1,58 @@
-\c projeto_db;
-
-DROP TABLE IF EXISTS animal CASCADE;
-DROP TABLE IF EXISTS raca CASCADE;
-DROP TABLE IF EXISTS especie CASCADE;
-DROP TABLE IF EXISTS tutores CASCADE;
-DROP TABLE IF EXISTS estado CASCADE;
-
-CREATE TABLE estado (
-    id SERIAL PRIMARY KEY,
-    uf CHAR(2),
-    descricao VARCHAR(50) NOT NULL
+CREATE TABLE IF NOT EXISTS tutores (
+    id          SERIAL PRIMARY KEY,
+    nome        VARCHAR(200)        NOT NULL,
+    cpf         VARCHAR(14) UNIQUE  NOT NULL,
+    email       VARCHAR(200),
+    telefone    VARCHAR(20),
+    nascimento  DATE,
+    genero      VARCHAR(30),
+    cep         VARCHAR(10),
+    logradouro  VARCHAR(200),
+    numero      VARCHAR(20),
+    complemento VARCHAR(100),
+    bairro      VARCHAR(100),
+    cidade      VARCHAR(100),
+    estado      CHAR(2),
+    origem      VARCHAR(100),
+    obs         TEXT,
+    criado_em   TIMESTAMP DEFAULT NOW()
 );
 
-INSERT INTO estado (uf, descricao, regiao) VALUES
-('AC', 'Acre'),
-('AL', 'Alagoas'),
-('AP', 'Amapá'),
-('AM', 'Amazonas'),
-('BA', 'Bahia'),
-('CE', 'Ceará'),
-('DF', 'Distrito Federal'),
-('ES', 'Espírito'),
-('GO', 'Goiás'),
-('MA', 'Maranhão'),
-('MT', 'Mato Grosso'),
-('MS', 'Mato Grosso do Sul'),
-('MG', 'Minas Gerais'),
-('PA', 'Pará'),
-('PB', 'Paraíba'),
-('PR', 'Paraná'),
-('PE', 'Pernambuco'),
-('PI', 'Piauí'),
-('RJ', 'Rio de Janeiro'),
-('RN', 'Rio Grande do Norte'),
-('RS', 'Rio Grande do Sul'),
-('RO', 'Rondônia'),
-('RR', 'Roraima'),
-('SC', 'Santa Catarina'),
-('SP', 'São Paulo'),
-('SE', 'Sergipe'),
-('TO', 'Tocantins');
-
-CREATE TABLE tutores (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(50) NOT NULL,
-    email VARCHAR(50),
-    telefone VARCHAR(20),
-    endereco VARCHAR(255),
-    bairro VARCHAR(50),
-    cidade VARCHAR(50),
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    estado CHAR(2)
+CREATE TABLE IF NOT EXISTS animais (
+    id              SERIAL PRIMARY KEY,
+    tutor_id        INTEGER NOT NULL REFERENCES tutores(id) ON DELETE CASCADE,
+    especie         VARCHAR(50)  NOT NULL,
+    nome            VARCHAR(100) NOT NULL,
+    raca            VARCHAR(100),
+    cor             VARCHAR(80),
+    sexo            VARCHAR(20),
+    nascimento      DATE,
+    porte           VARCHAR(20),
+    castrado        VARCHAR(20),
+    peso            NUMERIC(6,2),
+    microchip       VARCHAR(50),
+    condicoes       TEXT,           -- valores separados por vírgula
+    medicamentos    TEXT,
+    ultima_vacina   DATE,
+    proxima_vacina  DATE,
+    temperamento    VARCHAR(80),
+    reacao_banho    VARCHAR(80),
+    obs             TEXT,
+    criado_em       TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE raca (
-    cod_raca SERIAL PRIMARY KEY,
-    descricao VARCHAR(50) NOT NULL
-);
-
-INSERT INTO raca (descricao) VALUES
-    ('Vira-lata'),
-    ('Labrador'),
-    ('Golden Retriever'),
-    ('Poodle'),
-    ('Bulldog'),
-    ('Vira-lata'),
-    ('Persa'),
-    ('Siamês'),
-    ('Maine Coon');
-
-CREATE TABLE animal (
-    id SERIAL PRIMARY KEY,
-    tutor INT REFERENCES tutores(id),
-    nome VARCHAR(50) NOT NULL,
-    sexo CHAR(1) NOT NULL CHECK (sexo IN ('M', 'F')),
-    dtnascimento DATE,
-    cor VARCHAR(30),
-    porte CHAR(1) CHECK (porte IN ('P', 'M', 'G')),
-    microchip BOOLEAN DEFAULT FALSE,
-    num_chip VARCHAR(30),
-    castrado BOOLEAN DEFAULT FALSE,
-    doencas_alergias TEXT,
-    peso NUMERIC(5,2)
+CREATE TABLE IF NOT EXISTS agendamentos (
+    id          SERIAL PRIMARY KEY,
+    tutor_id    INTEGER REFERENCES tutores(id) ON DELETE SET NULL,
+    animal_id   INTEGER REFERENCES animais(id) ON DELETE SET NULL,
+    servico     VARCHAR(100) NOT NULL,
+    addons      TEXT,               -- valores separados por vírgula
+    data        DATE         NOT NULL,
+    horario     VARCHAR(10)  NOT NULL,
+    pagamento   VARCHAR(50),
+    notificacao VARCHAR(50),
+    obs         TEXT,
+    status      VARCHAR(30)  NOT NULL DEFAULT 'Confirmado',
+    total       NUMERIC(10,2),
+    criado_em   TIMESTAMP DEFAULT NOW()
 );

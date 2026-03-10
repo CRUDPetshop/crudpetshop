@@ -7,39 +7,50 @@ services:
     container_name: projeto_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-projeto_db}
+      POSTGRES_DB: ${DB_NAME:-petshop}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       PGDATA: /var/lib/postgresql/data/pgdata
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
     ports:
       - "${DB_PORT:-5432}:5432"
+
     networks:
       - projeto_network
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+
   adminer:
     image: adminer:latest
     container_name: projeto_adminer
     restart: unless-stopped
+
     ports:
       - "8080:8080"
+
     networks:
       - projeto_network
+
     depends_on:
       - postgres
+
     environment:
       ADMINER_DEFAULT_SERVER: postgres
+
 
 volumes:
   postgres_data:
     driver: local
+
 
 networks:
   projeto_network:
