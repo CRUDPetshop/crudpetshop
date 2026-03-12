@@ -116,7 +116,7 @@ class Database:
             FROM tutores
             ORDER BY id;     
         """
-           
+  
         return self.execute_query(query)
     
     def lista_tutor_id(self, id):
@@ -126,12 +126,10 @@ class Database:
             FROM tutores
             WHERE id = %s;
         """
-        
-        return self.execute_query(query)
+
+        return self.execute_query(query, id)
 
 
-
-    
     def listar_pets(self):
 
         if not self.conn:
@@ -159,10 +157,6 @@ class Database:
             )
             RETURNING *;
         """
-        # with self.conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        #     cursor.execute(query, dados)
-        #     self.conn.commit()
-        #     tutor = cursor.fetchone()
         tutor = self.execute_query(query, dados)
         return self._convert_dates(tutor)
     
@@ -181,11 +175,7 @@ class Database:
                 %(proxima_vacina)s, %(temperamento)s, %(reacao_banho)s, %(obs)s, NOW()
             )
             RETURNING *;
-    """
-        # with self.conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        #     cursor.execute(query, dados)
-        #     self.conn.commit()
-        #     pet = cursor.fetchone()
+        """
         pet = self.execute_query(query, dados)
         return self._convert_dates(pet)
 
@@ -209,16 +199,12 @@ class Database:
                 obs = %(obs)s
             WHERE id = %(id)s
             RETURNING *;
-    """
+        """
         dados["id"] = id
-
-        # with self.conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        #     cursor.execute(query, dados)
-        #     self.conn.commit()
-        #     tutor = cursor.fetchone()
         tutor = self.execute_query(query, dados)
         return self._convert_dates(tutor)
-    
+
+
     def atualizar_pet(self, id, dados):
         query = """
             UPDATE animais
@@ -242,69 +228,59 @@ class Database:
                 obs = %(obs)s
             WHERE id = %(id)s
             RETURNING *;
-    """
+        """
         dados["id"] = id
-
-        # with self.conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        #     cursor.execute(query, dados)
-        #     self.conn.commit()
-        #     pet = cursor.fetchone()
         pet = self.execute_query(query, dados)
         return self._convert_dates(pet)
     
     def deletar_tutor(self, id):
         query = """
-        DELETE FROM tutores
-        WHERE id = %s;
-    """
+            DELETE FROM tutores
+            WHERE id = %s;
+        """
         with self.conn.cursor() as cursor:
             cursor.execute(query, (id,))
             self.conn.commit()
 
     def deletar_pet(self, id):
         query = """
-        DELETE FROM animais
-        WHERE id = %s;
-    """
+            DELETE FROM animais
+            WHERE id = %s;
+        """
         with self.conn.cursor() as cursor:
             cursor.execute(query, (id,))
             self.conn.commit()
 
     def criar_agendamento(self, dados):
         query = """
-            INSERT INTO agendamentos (
-            tutor_id,
-            animal_id,
-            servico,
-            addons,
-            data,
-            horario,
-            pagamento,
-            notificacao,
-            obs,
-            status,
-            total
-        )
-        VALUES (
-            %(tutor_id)s,
-            %(animal_id)s,
-            %(servico)s,
-            %(addons)s,
-            %(data)s,
-            %(horario)s,
-            %(pagamento)s,
-            %(notificacao)s,
-            %(obs)s,
-            %(status)s,
-            %(total)s
-        )
-        RETURNING *;
-    """
-    
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(query, dados)
-            self.conn.commit()
-            agendamento = cursor.fetchone()
-        
+                INSERT INTO agendamentos (
+                tutor_id,
+                animal_id,
+                servico,
+                addons,
+                data,
+                horario,
+                pagamento,
+                notificacao,
+                obs,
+                status,
+                total
+            )
+            VALUES (
+                %(tutor_id)s,
+                %(animal_id)s,
+                %(servico)s,
+                %(addons)s,
+                %(data)s,
+                %(horario)s,
+                %(pagamento)s,
+                %(notificacao)s,
+                %(obs)s,
+                %(status)s,
+                %(total)s
+            )
+            RETURNING *;
+        """
+
+        agendamento = self._convert_dates(query, dados)
         return self._convert_dates(agendamento)
-    
