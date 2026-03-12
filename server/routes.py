@@ -83,3 +83,14 @@ def delete_pet(req, res):
     return res.json({
         "message": "Pet deletado."
     })
+
+#Rota para Agendamentos
+@router.post('api/agendamentos')
+def cria_agendamento(req, res):
+    dados = req.body
+    agendamento = db.criar_agendamento(dados)
+    return res.json({
+        "message": "Serviço agendado com sucesso",
+        "agendamento": agendamento
+    })
+
