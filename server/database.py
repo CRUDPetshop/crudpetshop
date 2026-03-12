@@ -90,6 +90,22 @@ class Database:
              
         return dados
     
+    def lista_tutor_id(self, id):
+
+        query = """
+            SELECT *
+            FROM tutores
+            WHERE id = %s;
+        """
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query, (id,))
+            tutor = cursor.fetchone()
+
+        return self._convert_dates(tutor)
+
+
+
+    
     def listar_pets(self):
 
         if not self.conn:
