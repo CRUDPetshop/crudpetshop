@@ -127,7 +127,8 @@ class Database:
             WHERE id = %s;
         """
 
-        return self.execute_query(query, id)
+        result =  self.execute_query(query, id)
+        return result[0] if result else None
 
 
     def listar_pets(self):
@@ -202,7 +203,7 @@ class Database:
         """
         dados["id"] = id
         tutor = self.execute_query(query, dados)
-        return self._convert_dates(tutor)
+        return tutor[0] if tutor else None
 
 
     def atualizar_pet(self, id, dados):
@@ -231,7 +232,7 @@ class Database:
         """
         dados["id"] = id
         pet = self.execute_query(query, dados)
-        return self._convert_dates(pet)
+        return pet[0] if pet else None
     
     def deletar_tutor(self, id):
         query = """

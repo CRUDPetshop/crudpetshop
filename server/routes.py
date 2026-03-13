@@ -15,7 +15,7 @@ def lista_tutores(req, res):
 #Rota para listar tutor por ID
 @router.get('/api/tutores/:id')
 def lista_tutores_id(req, res):
-    id = req.params["id"]
+    id = int(req.params["id"][0])
     tutor = db.lista_tutor_id(id)
     return res.json({
         "tutor": tutor
@@ -52,7 +52,7 @@ def cad_pet(req, res):
 #Rota de cadastro para atualizar tutor
 @router.put('/api/att_tutores/:id')
 def atualiza_tutor(req, res):
-    id = req.params["id"]
+    id = int(req.params["id"][0])
     dados = req.body
     tutor = db.atualizar_tutor(id, dados)
     return res.json(tutor)
@@ -60,7 +60,7 @@ def atualiza_tutor(req, res):
 #Rota de cadastro para atualizar pet
 @router.put('/api/att_pet/:id')
 def atualiza_pet(req, res):
-    id = req.params("id")
+    id = int(req.params("id")[0])
     dados = req.body
     pet = db.atualizar_pet(id, dados)
 
