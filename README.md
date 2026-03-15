@@ -52,7 +52,9 @@ projeto-fullstack/
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/projeto-fullstack.git
+git clone https://github.com/CRUDPetshop/crudpetshop.git
+// ou 
+git clone git@github.com:CRUDPetshop/crudpetshop.git
 cd projeto-fullstack
 ```
 
