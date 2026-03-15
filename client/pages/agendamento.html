@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agendamento de Serviços – PataFeliz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:    #FFF8EE;
+      --green:    #1C4A32;
+      --green-lt: #2D6A4F;
+      --amber:    #E8A020;
+      --coral:    #E8613C;
+      --dark:     #122018;
+      --card-bg:  #FFFDF8;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--dark); }
+    h1,h2,h3,h4,h5 { font-family: 'Playfair Display', serif; }
+
+    .navbar { background: var(--green); padding: .9rem 2rem; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 20px rgba(0,0,0,.25); }
+    .navbar-brand { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: var(--cream) !important; }
+    .navbar-brand span { color: var(--amber); }
+    .nav-link { color: rgba(255,248,238,.8) !important; font-weight: 500; font-size: .95rem; padding: .5rem 1rem !important; border-radius: 6px; transition: all .2s; }
+    .nav-link:hover, .nav-link.active { color: var(--cream) !important; background: rgba(255,255,255,.12); }
+    .btn-nav-cta { background: var(--amber); color: var(--dark) !important; font-weight: 600; border-radius: 50px; padding: .45rem 1.3rem !important; }
+
+    .page-header { background: var(--green); padding: 3rem 0 2.5rem; color: white; position: relative; overflow: hidden; }
+    .page-header::after { content: '📅'; position: absolute; right: 8%; top: 50%; transform: translateY(-50%); font-size: 7rem; opacity: .08; }
+    .page-header .breadcrumb-item a { color: var(--amber); text-decoration: none; }
+    .page-header .breadcrumb-item.active { color: rgba(255,255,255,.6); }
+    .page-header .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.3); }
+    .page-header h1 { font-size: 2.2rem; color: white; }
+    .page-header p { color: rgba(255,255,255,.65); font-size: .95rem; }
+
+    .form-section { padding: 3rem 0 5rem; }
+
+    /* STEPS */
+    .steps-bar { display: flex; align-items: center; gap: .5rem; background: white; border: 1px solid rgba(28,74,50,.1); border-radius: 16px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+    .step-item { display: flex; align-items: center; gap: .5rem; flex: 1; }
+    .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
+    .step-circle.done { background: var(--green); color: white; }
+    .step-circle.active { background: var(--amber); color: var(--dark); }
+    .step-circle.pending { background: #eee; color: #aaa; }
+    .step-text { font-size: .82rem; font-weight: 500; }
+    .step-text.done { color: var(--green); }
+    .step-text.active { color: var(--dark); }
+    .step-text.pending { color: #bbb; }
+    .step-connector { height: 2px; flex: 1; border-radius: 2px; }
+
+    /* FORM CARD */
+    .form-card { background: var(--card-bg); border-radius: 24px; border: 1px solid rgba(28,74,50,.1); overflow: hidden; box-shadow: 0 4px 24px rgba(28,74,50,.06); }
+    .form-card-header { padding: 1.8rem 2rem 1.4rem; border-bottom: 1px solid rgba(28,74,50,.07); display: flex; align-items: center; gap: 1rem; }
+    .form-card-icon { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, var(--green-lt), var(--green)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .form-card-header h4 { margin: 0; font-size: 1.3rem; }
+    .form-card-header p { margin: 0; font-size: .84rem; color: #777; }
+    .form-body { padding: 2rem; }
+
+    .form-label { font-weight: 600; font-size: .88rem; color: var(--dark); margin-bottom: .4rem; }
+    .form-label .req { color: var(--coral); margin-left: 2px; }
+    .form-control, .form-select { border: 1.5px solid #ddd; border-radius: 10px; padding: .7rem 1rem; font-size: .92rem; font-family: 'DM Sans', sans-serif; background: white; transition: all .2s; }
+    .form-control:focus, .form-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(28,74,50,.1); outline: none; }
+    .form-section-label { font-size: .78rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green); padding-bottom: .5rem; border-bottom: 2px solid rgba(28,74,50,.12); margin-bottom: 1.2rem; margin-top: 1.5rem; }
+
+    /* SERVICE CARDS */
+    .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .service-option {
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 16px;
+      padding: 1.2rem;
+      cursor: pointer;
+      transition: all .25s;
+      position: relative;
+    }
+    .service-option:hover { border-color: var(--green-lt); background: #F0F7F4; }
+    .service-option.selected { border-color: var(--green); background: #E8F5E9; }
+    .service-option .check-indicator {
+      position: absolute; top: .8rem; right: .8rem;
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid #ddd;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; transition: all .2s;
+    }
+    .service-option.selected .check-indicator { background: var(--green); border-color: var(--green); color: white; }
+    .service-emoji { font-size: 2rem; margin-bottom: .5rem; }
+    .service-name { font-weight: 700; font-size: .92rem; margin-bottom: .2rem; }
+    .service-desc { font-size: .78rem; color: #777; margin-bottom: .5rem; }
+    .service-price { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--green); }
+    .service-duration { font-size: .72rem; color: #aaa; }
+
+    /* ADDONS */
+    .addon-list { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .addon-item {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .8rem 1rem;
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .addon-item:hover { border-color: var(--amber); background: #FFFDE7; }
+    .addon-item input { accent-color: var(--green); width: 16px; height: 16px; }
+    .addon-price { margin-left: auto; font-weight: 700; color: var(--green); font-size: .82rem; }
+
+    /* TIME SLOTS */
+    .time-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+    .time-slot {
+      padding: .6rem .5rem;
+      text-align: center;
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      transition: all .2s;
+      color: #555;
+    }
+    .time-slot:hover { border-color: var(--green); color: var(--green); background: #F0F7F4; }
+    .time-slot.selected { border-color: var(--green); background: var(--green); color: white; }
+    .time-slot.unavailable { background: #f5f5f5; color: #ccc; cursor: not-allowed; border-color: #eee; }
+
+    /* SUMMARY */
+    .summary-card {
+      background: var(--dark);
+      color: white;
+      border-radius: 20px;
+      padding: 1.5rem;
+      position: sticky;
+      top: 90px;
+    }
+    .summary-card h6 { color: white; font-size: 1rem; margin-bottom: 1.2rem; padding-bottom: .8rem; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: .87rem; margin-bottom: .7rem; }
+    .summary-label { color: rgba(255,255,255,.6); }
+    .summary-value { font-weight: 600; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.15); }
+    .summary-total .label { font-weight: 600; font-size: .95rem; }
+    .summary-total .price { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--amber); }
+
+    /* PET CARD DISPLAY */
+    .pet-display {
+      background: white;
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      border: 1.5px solid rgba(28,74,50,.12);
+      display: flex; align-items: center; gap: 1rem;
+      margin-top: .5rem;
+    }
+    .pet-display-avatar { font-size: 2.2rem; }
+    .pet-display-info .name { font-weight: 700; }
+    .pet-display-info .meta { font-size: .8rem; color: #888; }
+
+    /* BUTTONS */
+    .btn-save { background: var(--green); color: white; font-weight: 700; padding: 1rem 2.5rem; border-radius: 14px; border: none; font-size: 1rem; cursor: pointer; transition: all .25s; display: inline-flex; align-items: center; gap: .6rem; width: 100%; justify-content: center; }
+    .btn-save:hover { background: var(--green-lt); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(28,74,50,.3); }
+    .btn-back { background: transparent; color: #888; font-weight: 600; padding: .75rem; border-radius: 12px; border: 1.5px solid #ddd; font-size: .9rem; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: .4rem; }
+    .btn-back:hover { border-color: #aaa; color: #555; }
+
+    /* CONFIRMED STATE */
+    .confirm-screen { display: none; text-align: center; padding: 3rem 2rem; }
+    .confirm-screen .big-emoji { font-size: 5rem; animation: bounce .6s ease; }
+    @keyframes bounce { 0% { transform: scale(.5); opacity:0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity:1; } }
+    .confirm-screen h3 { margin: 1rem 0 .5rem; }
+    .confirm-screen p { color: #666; margin-bottom: 1.5rem; }
+
+    /* TOAST */
+    .toast-wrap { position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; }
+    .toast-msg { background: var(--green); color: white; padding: 1rem 1.5rem; border-radius: 14px; display: flex; align-items: center; gap: .8rem; font-weight: 500; font-size: .92rem; box-shadow: 0 8px 24px rgba(0,0,0,.25); transform: translateY(100px); opacity: 0; transition: all .4s ease; }
+    .toast-msg.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 576px) {
+      .services-grid, .addon-list { grid-template-columns: 1fr; }
+      .time-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="/">🐾 Pata<span>Feliz</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="bi bi-list text-white fs-3"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+        <li class="nav-item"><a class="nav-link" href="/">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="servicos">Serviços</a></li>
+        <li class="nav-item"><a class="nav-link" href="tutores">Tutores</a></li>
+        <li class="nav-item"><a class="nav-link" href="animais">Animais</a></li>
+        <li class="nav-item ms-lg-2"><a class="nav-link btn-nav-cta active" href="agendamento">Agendar</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="/">Início</a></li>
+        <li class="breadcrumb-item active">Agendamento</li>
+      </ol>
+    </nav>
+    <h1>Agendamento de Serviços</h1>
+    <p>Selecione o serviço, escolha data e horário e confirme. Simples assim!</p>
+  </div>
+</div>
+
+<div class="form-section">
+  <div class="container">
+
+    <!-- STEPS -->
+    <div class="steps-bar">
+      <div class="step-item">
+        <div class="step-circle done"><i class="bi bi-check"></i></div>
+        <div class="step-text done">Dados do Tutor</div>
+      </div>
+      <div class="step-connector" style="background:var(--green);opacity:.4"></div>
+      <div class="step-item">
+        <div class="step-circle done"><i class="bi bi-check"></i></div>
+        <div class="step-text done">Cadastro do Pet</div>
+      </div>
+      <div class="step-connector" style="background:var(--amber);opacity:.4"></div>
+      <div class="step-item">
+        <div class="step-circle active">3</div>
+        <div class="step-text active">Agendar Serviço</div>
+      </div>
+    </div>
+
+    <div class="row gy-4">
+      <div class="col-lg-8">
+        <div class="form-card" id="formCard">
+          <div class="form-card-header">
+            <div class="form-card-icon">📅</div>
+            <div>
+              <h4>Novo Agendamento</h4>
+              <p>Preencha os dados para confirmar o serviço</p>
+            </div>
+          </div>
+
+          <!-- FORM -->
+          <div class="form-body" id="formBody">
+            <form id="agendForm" novalidate>
+
+              <!-- PET & TUTOR -->
+              <div class="form-section-label">Pet & Tutor</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Tutor <span class="req">*</span></label>
+                  <select class="form-select" id="agTutor" required>
+                    <option value="">Selecione o tutor...</option>
+                  </select>
+                  <div class="invalid-feedback">Selecione um tutor.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Pet <span class="req">*</span></label>
+                  <select class="form-select" id="agPet" required>
+                    <option value="">Selecione o pet...</option>
+                  </select>
+                  <div class="invalid-feedback">Selecione um pet.</div>
+                </div>
+              </div>
+              <div id="petDisplay" style="display:none"></div>
+
+              <!-- SERVICES -->
+              <div class="form-section-label">Escolha o Serviço Principal <span class="req">*</span></div>
+              <div class="services-grid">
+                <div class="service-option" data-service="Banho Simples" data-price="45" onclick="selectService(this)">
+                  <div class="check-indicator"><i class="bi bi-check"></i></div>
+                  <div class="service-emoji">🛁</div>
+                  <div class="service-name">Banho Simples</div>
+                  <div class="service-desc">Banho + secagem + perfume</div>
+                  <div class="service-price">R$ 45</div>
+                  <div class="service-duration"><i class="bi bi-clock"></i> ~1h</div>
+                </div>
+                <div class="service-option" data-service="Banho + Tosa" data-price="75" onclick="selectService(this)">
+                  <div class="check-indicator"><i class="bi bi-check"></i></div>
+                  <div class="service-emoji">✂️</div>
+                  <div class="service-name">Banho + Tosa</div>
+                  <div class="service-desc">Banho completo + tosa personalizada</div>
+                  <div class="service-price">R$ 75</div>
+                  <div class="service-duration"><i class="bi bi-clock"></i> ~2h</div>
+                </div>
+                <div class="service-option" data-service="Tosa Higiênica" data-price="40" onclick="selectService(this)">
+                  <div class="check-indicator"><i class="bi bi-check"></i></div>
+                  <div class="service-emoji">🐕</div>
+                  <div class="service-name">Tosa Higiênica</div>
+                  <div class="service-desc">Higienização das áreas sensíveis</div>
+                  <div class="service-price">R$ 40</div>
+                  <div class="service-duration"><i class="bi bi-clock"></i> ~45min</div>
+                </div>
+                <div class="service-option" data-service="Consulta Veterinária" data-price="120" onclick="selectService(this)">
+                  <div class="check-indicator"><i class="bi bi-check"></i></div>
+                  <div class="service-emoji">🩺</div>
+                  <div class="service-name">Consulta Veterinária</div>
+                  <div class="service-desc">Avaliação clínica completa</div>
+                  <div class="service-price">R$ 120</div>
+                  <div class="service-duration"><i class="bi bi-clock"></i> ~30min</div>
+                </div>
+                <div class="service-option" data-service="Vacinação" data-price="65" onclick="selectService(this)">
+                  <div class="check-indicator"><i class="bi bi-check"></i></div>
+                  <div class="service-emoji">💉</div>
+                  <div class="service-name">Vacinação</div>
+                  <div class="service-desc">Vacinas importadas e nacionais</div>
+                  <div class="service-price">R$ 65</div>
+                  <div class="service-duration"><i class="bi bi-clock"></i> ~20min</div>
+                </div>
+                <div class="service-option" data-service="Pet Hotel" data-price="80" onclick="selectService(this)">
+                  <div class="check-indicator"><i class="bi bi-check"></i></div>
+                  <div class="service-emoji">🏨</div>
+                  <div class="service-name">Pet Hotel</div>
+                  <div class="service-desc">Hospedagem diária com monitoramento</div>
+                  <div class="service-price">R$ 80/dia</div>
+                  <div class="service-duration"><i class="bi bi-clock"></i> Diária</div>
+                </div>
+              </div>
+              <input type="hidden" id="servicoPrincipal" required>
+              <div id="servicoError" style="display:none; color:var(--coral); font-size:.8rem; margin-top:.3rem;">Selecione um serviço.</div>
+
+              <!-- ADD-ONS -->
+              <div class="form-section-label">Adicionais (opcional)</div>
+              <div class="addon-list">
+                <label class="addon-item"><input type="checkbox" name="addon" value="Hidratação" data-price="20" onchange="calcTotal()"> 💧 Hidratação de pelagem <span class="addon-price">+R$20</span></label>
+                <label class="addon-item"><input type="checkbox" name="addon" value="Corte de unhas" data-price="15" onchange="calcTotal()"> 💅 Corte de unhas <span class="addon-price">+R$15</span></label>
+                <label class="addon-item"><input type="checkbox" name="addon" value="Limpeza de ouvido" data-price="15" onchange="calcTotal()"> 👂 Limpeza de ouvido <span class="addon-price">+R$15</span></label>
+                <label class="addon-item"><input type="checkbox" name="addon" value="Perfume especial" data-price="10" onchange="calcTotal()"> 🌸 Perfume especial <span class="addon-price">+R$10</span></label>
+                <label class="addon-item"><input type="checkbox" name="addon" value="Escovação dental" data-price="25" onchange="calcTotal()"> 🦷 Escovação dental <span class="addon-price">+R$25</span></label>
+                <label class="addon-item"><input type="checkbox" name="addon" value="Anti-pulgas" data-price="30" onchange="calcTotal()"> 🦟 Tratamento anti-pulgas <span class="addon-price">+R$30</span></label>
+              </div>
+
+              <!-- DATE & TIME -->
+              <div class="form-section-label">Data e Horário</div>
+              <div class="row g-3">
+                <div class="col-md-5">
+                  <label class="form-label">Data do Agendamento <span class="req">*</span></label>
+                  <input type="date" class="form-control" id="agData" required min="">
+                  <div class="invalid-feedback">Selecione uma data.</div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Horário Disponível <span class="req">*</span></label>
+                  <div class="time-grid" id="timeGrid">
+                    <div class="time-slot unavailable">08:00</div>
+                    <div class="time-slot" onclick="selectTime(this)">08:30</div>
+                    <div class="time-slot" onclick="selectTime(this)">09:00</div>
+                    <div class="time-slot unavailable">09:30</div>
+                    <div class="time-slot" onclick="selectTime(this)">10:00</div>
+                    <div class="time-slot" onclick="selectTime(this)">10:30</div>
+                    <div class="time-slot unavailable">11:00</div>
+                    <div class="time-slot" onclick="selectTime(this)">11:30</div>
+                    <div class="time-slot" onclick="selectTime(this)">13:00</div>
+                    <div class="time-slot" onclick="selectTime(this)">13:30</div>
+                    <div class="time-slot" onclick="selectTime(this)">14:00</div>
+                    <div class="time-slot unavailable">14:30</div>
+                    <div class="time-slot" onclick="selectTime(this)">15:00</div>
+                    <div class="time-slot" onclick="selectTime(this)">15:30</div>
+                    <div class="time-slot" onclick="selectTime(this)">16:00</div>
+                    <div class="time-slot" onclick="selectTime(this)">16:30</div>
+                  </div>
+                  <input type="hidden" id="agHorario" required>
+                  <div id="horarioError" style="display:none; color:var(--coral); font-size:.8rem; margin-top:.3rem;">Selecione um horário.</div>
+                  <p style="font-size:.75rem; color:#aaa; margin-top:.5rem;"><i class="bi bi-circle-fill" style="font-size:.4rem;vertical-align:middle;color:#ccc"></i> Cinza = indisponível</p>
+                </div>
+              </div>
+
+              <!-- PAYMENT & OBS -->
+              <div class="form-section-label">Pagamento & Observações</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Forma de Pagamento</label>
+                  <select class="form-select" id="pagamento">
+                    <option value="">Selecione...</option>
+                    <option>PIX</option>
+                    <option>Cartão de Débito</option>
+                    <option>Cartão de Crédito</option>
+                    <option>Dinheiro</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Como deseja a notificação?</label>
+                  <select class="form-select" id="notificacao">
+                    <option>WhatsApp</option>
+                    <option>E-mail</option>
+                    <option>Ambos</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Observações para o serviço</label>
+                  <textarea class="form-control" id="agObs" rows="2" placeholder="Preferências de corte, cuidados especiais, etc..."></textarea>
+                </div>
+              </div>
+
+              <div class="mt-4 d-flex gap-2 align-items-center flex-wrap">
+                <button type="submit" class="btn-save flex-grow-1" style="max-width:340px">
+                  <i class="bi bi-calendar-check-fill"></i> Confirmar Agendamento
+                </button>
+                <a href="animais" class="btn-back"><i class="bi bi-arrow-left"></i> Voltar</a>
+              </div>
+            </form>
+          </div>
+
+          <!-- CONFIRM SCREEN -->
+          <div class="confirm-screen" id="confirmScreen">
+            <div class="big-emoji">🎉</div>
+            <h3>Agendamento Confirmado!</h3>
+            <p>Seu pet será atendido conforme os detalhes abaixo.<br>Você receberá uma confirmação em breve.</p>
+            <div id="confirmDetails" style="background:#f8f8f8; border-radius:14px; padding:1.2rem; text-align:left; font-size:.88rem; margin-bottom:1.5rem;"></div>
+            <button onclick="resetAgendamento()" class="btn-save" style="display:inline-flex; width:auto; padding:.85rem 2rem">
+              <i class="bi bi-plus-circle"></i> Novo Agendamento
+            </button>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="form-card mt-4" id="historyCard" style="display:none">
+          <div class="form-card-header">
+            <div class="form-card-icon" style="background:linear-gradient(135deg,var(--amber),#c07010)">📋</div>
+            <div>
+              <h4>Histórico de Agendamentos</h4>
+              <p>Seus últimos serviços agendados</p>
+            </div>
+          </div>
+          <div id="historyList" style="padding:1rem"></div>
+        </div>
+      </div>
+
+      <!-- SUMMARY SIDEBAR -->
+      <div class="col-lg-4">
+        <div class="summary-card">
+          <h6>📋 Resumo do Pedido</h6>
+          <div class="summary-row">
+            <span class="summary-label">Pet</span>
+            <span class="summary-value" id="sumPet">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Serviço</span>
+            <span class="summary-value" id="sumServico">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Data</span>
+            <span class="summary-value" id="sumData">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Horário</span>
+            <span class="summary-value" id="sumHorario">—</span>
+          </div>
+          <div id="sumAddonsWrap" style="display:none">
+            <div class="summary-row">
+              <span class="summary-label">Adicionais</span>
+              <span class="summary-value" id="sumAddons">—</span>
+            </div>
+          </div>
+          <div class="summary-total">
+            <span class="label">Total estimado</span>
+            <span class="price" id="sumTotal">R$ 0</span>
+          </div>
+
+          <div style="margin-top:1.2rem; padding:1rem; background:rgba(255,255,255,.06); border-radius:12px; font-size:.82rem; color:rgba(255,255,255,.55)">
+            <i class="bi bi-info-circle me-1"></i>
+            Valor pode variar conforme o porte do animal. Confirmação por WhatsApp em até 30min.
+          </div>
+        </div>
+
+        <div class="mt-3" style="background:white; border-radius:16px; padding:1.3rem; border:1px solid rgba(28,74,50,.08)">
+          <h6 style="font-size:.95rem; margin-bottom:.8rem">📞 Precisa de ajuda?</h6>
+          <p style="font-size:.83rem; color:#666; margin-bottom:.8rem">Fale com nossa equipe pelo WhatsApp para dúvidas ou agendamentos especiais.</p>
+          <a href="https://wa.me/5511999999999" target="_blank" style="background:#25D366; color:white; font-weight:600; padding:.6rem 1rem; border-radius:10px; font-size:.85rem; text-decoration:none; display:flex; align-items:center; gap:.4rem">
+            <i class="bi bi-whatsapp"></i> Abrir WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap">
+  <div class="toast-msg" id="toastMsg">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <span id="toastText"></span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API = '/api';
+  const specieEmojis = { Cachorro:'🐶', Gato:'🐱', Coelho:'🐰', Pássaro:'🐦', Hamster:'🐹', Peixe:'🐠', Réptil:'🦎', Outro:'🐾' };
+  let petsCache = []; // cache dos pets do tutor selecionado
+
+  function showToast(msg, isErr = false){
+    const t = document.getElementById('toastMsg');
+    document.getElementById('toastText').textContent = msg;
+    t.style.background = isErr ? '#E8613C' : 'var(--green)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Carrega tutores ──
+  async function loadTutores(){
+    try {
+      const r = await fetch(`${API}/tutores`);
+      const tutores = await r.json();
+      const sel = document.getElementById('agTutor');
+      sel.innerHTML = '<option value="">Selecione o tutor...</option>';
+      tutores.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.nome;
+        sel.appendChild(opt);
+      });
+    } catch { showToast('Erro ao carregar tutores.', true); }
+  }
+
+  // ── Ao selecionar tutor, carrega seus pets ──
+  document.getElementById('agTutor').addEventListener('change', async function(){
+    const petSel = document.getElementById('agPet');
+    petSel.innerHTML = '<option value="">Selecione o pet...</option>';
+    document.getElementById('petDisplay').style.display = 'none';
+    document.getElementById('sumPet').textContent = '—';
+    petsCache = [];
+    if (!this.value) return;
+    try {
+      const r = await fetch(`${API}/animais?tutor_id=${this.value}`);
+      petsCache = await r.json();
+      petsCache.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${specieEmojis[p.especie]||'🐾'} ${p.nome} (${p.especie}${p.porte?' · '+p.porte:''})`;
+        petSel.appendChild(opt);
+      });
+    } catch { showToast('Erro ao carregar pets.', true); }
+    updateSummary();
+  });
+
+  // ── Ao selecionar pet, exibe card ──
+  document.getElementById('agPet').addEventListener('change', function(){
+    const p = petsCache.find(p => String(p.id) === String(this.value));
+    const disp = document.getElementById('petDisplay');
+    if (p) {
+      disp.style.display = 'block';
+      disp.innerHTML = `<div class="pet-display">
+        <div class="pet-display-avatar">${specieEmojis[p.especie]||'🐾'}</div>
+        <div class="pet-display-info">
+          <div class="name">${p.nome}</div>
+          <div class="meta">${p.especie}${p.raca?' · '+p.raca:''}${p.porte?' · '+p.porte:''}${p.sexo?' · '+p.sexo:''}</div>
+        </div>
+      </div>`;
+      document.getElementById('sumPet').textContent = p.nome;
+    } else {
+      disp.style.display = 'none';
+      document.getElementById('sumPet').textContent = '—';
+    }
+    updateSummary();
+  });
+
+  // ── Data mínima ──
+  document.getElementById('agData').min = new Date().toISOString().split('T')[0];
+  document.getElementById('agData').addEventListener('change', updateSummary);
+
+  function selectService(el){
+    document.querySelectorAll('.service-option').forEach(s=>s.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('servicoPrincipal').value = el.dataset.service;
+    document.getElementById('servicoError').style.display = 'none';
+    calcTotal(); updateSummary();
+  }
+
+  function selectTime(el){
+    if (el.classList.contains('unavailable')) return;
+    document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('agHorario').value = el.textContent.trim();
+    document.getElementById('horarioError').style.display = 'none';
+    updateSummary();
+  }
+
+  function calcTotal(){
+    const sel = document.querySelector('.service-option.selected');
+    let total = sel ? parseInt(sel.dataset.price) : 0;
+    document.querySelectorAll('[name="addon"]:checked').forEach(a => total += parseInt(a.dataset.price));
+    document.getElementById('sumTotal').textContent = `R$ ${total}`;
+    const addons = [...document.querySelectorAll('[name="addon"]:checked')].map(a=>a.value);
+    document.getElementById('sumAddonsWrap').style.display = addons.length ? '' : 'none';
+    if (addons.length) document.getElementById('sumAddons').textContent = addons.join(', ');
+  }
+
+  function updateSummary(){
+    const sel = document.querySelector('.service-option.selected');
+    document.getElementById('sumServico').textContent = sel ? sel.dataset.service : '—';
+    const dataVal = document.getElementById('agData').value;
+    document.getElementById('sumData').textContent = dataVal
+      ? new Date(dataVal+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'})
+      : '—';
+    document.getElementById('sumHorario').textContent = document.getElementById('agHorario').value || '—';
+  }
+
+  document.querySelectorAll('[name="addon"]').forEach(a => a.addEventListener('change', () => { calcTotal(); updateSummary(); }));
+
+  // ── Submit: salva agendamento na API ──
+  document.getElementById('agendForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    this.classList.add('was-validated');
+
+    let valid = true;
+    if (!document.getElementById('servicoPrincipal').value){
+      document.getElementById('servicoError').style.display = 'block'; valid = false;
+    }
+    if (!document.getElementById('agHorario').value){
+      document.getElementById('horarioError').style.display = 'block'; valid = false;
+    }
+    if (!this.checkValidity() || !valid) return;
+
+    const tutorId  = document.getElementById('agTutor').value;
+    const petId    = document.getElementById('agPet').value;
+    const servico  = document.getElementById('servicoPrincipal').value;
+    const data     = document.getElementById('agData').value;
+    const horario  = document.getElementById('agHorario').value;
+    const addons   = [...document.querySelectorAll('[name="addon"]:checked')].map(a=>a.value);
+    const total    = parseFloat(document.getElementById('sumTotal').textContent.replace('R$ ','')) || 0;
+    const pagamento    = document.getElementById('pagamento').value;
+    const notificacao  = document.getElementById('notificacao').value;
+    const obs          = document.getElementById('agObs').value;
+
+    const payload = { tutor_id: tutorId || null, animal_id: petId || null,
+      servico, addons, data, horario, pagamento, notificacao, obs, total, status: 'Confirmado' };
+
+    const saveBtn = this.querySelector('.btn-save');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Confirmando...';
+
+    try {
+      const r = await fetch(`${API}/agendamentos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const ag = await r.json();
+      if (!r.ok){ showToast(ag.error || 'Erro ao agendar.', true); return; }
+
+      // Show confirm screen
+      document.getElementById('formBody').style.display = 'none';
+      const cs = document.getElementById('confirmScreen');
+      cs.style.display = 'block';
+      const pet = petsCache.find(p => String(p.id) === String(petId));
+      const d = new Date(data+'T12:00:00');
+      cs.querySelector('#confirmDetails').innerHTML = `
+        <div style="display:grid; gap:.6rem">
+          <div><b>🐾 Pet:</b> ${pet?.nome||ag.animal_nome||'—'} (${pet?.especie||ag.animal_especie||''})</div>
+          <div><b>👤 Tutor:</b> ${ag.tutor_nome || '—'}</div>
+          <div><b>✂️ Serviço:</b> ${servico}</div>
+          ${addons.length ? `<div><b>➕ Adicionais:</b> ${addons.join(', ')}</div>` : ''}
+          <div><b>📅 Data:</b> ${d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</div>
+          <div><b>🕐 Horário:</b> ${horario}</div>
+          <div><b>💰 Total:</b> R$ ${total}</div>
+          ${pagamento ? `<div><b>💳 Pagamento:</b> ${pagamento}</div>` : ''}
+        </div>`;
+
+      await fetchHistory();
+    } catch {
+      showToast('Erro de conexão com o servidor.', true);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="bi bi-calendar-check-fill"></i> Confirmar Agendamento';
+    }
+  });
+
+  function resetAgendamento(){
+    document.getElementById('agendForm').reset();
+    document.getElementById('agendForm').classList.remove('was-validated');
+    document.getElementById('formBody').style.display = '';
+    document.getElementById('confirmScreen').style.display = 'none';
+    document.querySelectorAll('.service-option').forEach(s=>s.classList.remove('selected'));
+    document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('selected'));
+    document.getElementById('servicoPrincipal').value = '';
+    document.getElementById('agHorario').value = '';
+    document.getElementById('petDisplay').style.display = 'none';
+    document.getElementById('sumPet').textContent = '—';
+    document.getElementById('sumServico').textContent = '—';
+    document.getElementById('sumData').textContent = '—';
+    document.getElementById('sumHorario').textContent = '—';
+    document.getElementById('sumTotal').textContent = 'R$ 0';
+    petsCache = [];
+  }
+
+  // ── Histórico via API ──
+  async function fetchHistory(){
+    try {
+      const r = await fetch(`${API}/agendamentos`);
+      const list = await r.json();
+      if (!list.length) return;
+      document.getElementById('historyCard').style.display = '';
+      document.getElementById('historyList').innerHTML = list.map(ag => {
+        const d = new Date(ag.data+'T12:00:00');
+        return `
+          <div style="display:flex;align-items:center;gap:1rem;padding:.9rem 1rem;border-radius:12px;border:1px solid rgba(28,74,50,.08);margin-bottom:.6rem;background:white">
+            <div style="font-size:1.8rem">${specieEmojis[ag.animal_especie]||'🐾'}</div>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:.92rem">${ag.animal_nome||'—'} – ${ag.servico}</div>
+              <div style="font-size:.78rem;color:#888">${d.toLocaleDateString('pt-BR')} às ${ag.horario} · ${ag.tutor_nome||'—'}</div>
+            </div>
+            <div style="text-align:right">
+              <span style="background:#E8F5E9;color:var(--green);font-size:.75rem;font-weight:700;padding:.2rem .6rem;border-radius:50px">${ag.status}</span>
+              <div style="font-weight:700;font-size:.88rem;color:var(--green);margin-top:.2rem">R$ ${ag.total||0}</div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch { /* silently ignore */ }
+  }
+
+  // ── Init ──
+  loadTutores();
+  fetchHistory();
+</script>
+</script>
+</body>
+</html>

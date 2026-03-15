@@ -93,6 +93,7 @@ class Database:
 
             if fetch:
                 results = cursor.fetchall()
+                self.conn.commit()
                 cursor.close()
                 return [self._convert_dates(dict(row)) for row in results]
             else:
@@ -127,7 +128,7 @@ class Database:
             WHERE id = %s;
         """
 
-        result =  self.execute_query(query, id)
+        result =  self.execute_query(query, (id,))
         return result[0] if result else None
 
 

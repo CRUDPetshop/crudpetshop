@@ -1,99 +1,287 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Petshop</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PataFeliz PetShop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/css/index.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🐶 PetMax 🐱</h1>
-        </header>
 
-        <nav class="navigation">
-            <a href="/" class="nav-link active">🏠 Cadastro de Tutor</a>
-            <a href="/" class="nav-link">Cadastro de Pet</a>
-        </nav>
-
-        <main>
-            <section class="form-section">
-                <h2>Adicionar / Editar Tutor</h2>
-                
-                <form id="userForm">
-                    <input type="hidden" id="userId" value="">
-                    
-                    <div class="form-group">
-                        <label for="nome">Nome:</label>
-                        <input type="text" id="nome" name="nome" required placeholder="Digite o nome">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" required placeholder="Digite o email">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="telefone1">Telefone:</label>
-                        <input type="telefone1" id="telefone1" name="telefone1" required placeholder="Digite o telefone">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="endereco">Endereço:</label>
-                        <input type="endereco" id="endereco" name="endereco" required placeholder="Digite o endereco">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="bairro">Bairro:</label>
-                        <input type="bairro" id="bairro" name="bairro" required placeholder="Digite o bairro">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cidade">Cidade:</label>
-                        <input type="cidade" id="cidade" name="cidade" required placeholder="Digite o cidade">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="estado">Estado:</label>
-                        <input type="estado" id="estado" name="estado" required placeholder="Digite o estado">
-                    </div>
-
-                    <div class="form-buttons">
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            Adicionar Pet
-                        </button>
-                        <button type="button" class="btn btn-secondary" id="cancelBtn" style="display: none;">
-                            Cancelar
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Lista de usuários -->
-            <section class="users-section">
-                <div class="section-header">
-                    <h2>Lista de Tutores</h2>
-                    <button class="btn btn-refresh" id="refreshBtn">🔄 Atualizar</button>
-                </div>
-                
-                <div id="loadingIndicator" class="loading" style="display: none;">
-                    Carregando...
-                </div>
-
-                <div id="errorMessage" class="error-message" style="display: none;"></div>
-
-                <div id="usersList" class="users-list">
-                    <!-- Usuários serão carregados aqui via JavaScript -->
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <p>Projeto IMPACTA</p>
-        </footer>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="">🐾 Pata<span>Feliz</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="bi bi-list text-white fs-3"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+        <li class="nav-item"><a class="nav-link active" href="">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="servicos">Serviços</a></li>
+        <li class="nav-item"><a class="nav-link" href="tutores">Tutores</a></li>
+        <li class="nav-item"><a class="nav-link" href="animais">Animais</a></li>
+        <li class="nav-item ms-lg-2"><a class="nav-link btn-nav-cta" href="agendamento">Agendar</a></li>
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <script src="assets/js/app.js"></script>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob"></div>
+  <i class="bi bi-paw-fill hero-paw p1"></i>
+  <i class="bi bi-paw hero-paw p2"></i>
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <div class="hero-badge"><i class="bi bi-star-fill"></i> #1 PetShop da Região</div>
+          <h1 class="hero-title">Cuidado com <em>amor</em> para o seu melhor amigo</h1>
+          <p class="hero-sub">Banho, tosa, veterinário e muito mais. Seu pet merece o melhor tratamento, com profissionais apaixonados pelos animais.</p>
+          <div class="hero-actions">
+            <a href="agendamento" class="btn-primary-hero"><i class="bi bi-calendar-check"></i> Agendar Serviço</a>
+            <a href="servicos" class="btn-outline-hero">Ver Serviços</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-num">2.4k+</div>
+              <div class="stat-label">Pets atendidos</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">8 anos</div>
+              <div class="stat-label">De experiência</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">4.9★</div>
+              <div class="stat-label">Avaliação média</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5 offset-lg-1">
+        <div class="hero-img-wrap">
+          <div class="hero-img-card">
+            <div class="hero-pet-icon">🐶</div>
+            <p style="color:rgba(255,255,255,.7); margin-top:1rem; font-size:.9rem;">Seu pet em boas mãos</p>
+          </div>
+          <div class="floating-tag tag1">🛁 Banho & Tosa</div>
+          <div class="floating-tag tag2">❤️ Cuidado especial</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRIP -->
+<div class="services-strip">
+  <div class="strip-track">
+    <span class="strip-item">Banho & Tosa</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Consulta Veterinária</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Vacinação</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Pet Hotel</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Adestramento</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Produtos Premium</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Banho & Tosa</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Consulta Veterinária</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Vacinação</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Pet Hotel</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Adestramento</span><span class="strip-dot">✦</span>
+    <span class="strip-item">Produtos Premium</span><span class="strip-dot">✦</span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="section-services">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="sec-label">O que oferecemos</span>
+      <h2 class="sec-title">Serviços completos<br>para o seu pet</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <a href="agendamento" class="service-card">
+          <div class="service-icon" style="background:#E8F5E9">🛁</div>
+          <h5>Banho & Tosa</h5>
+          <p>Banho completo, secagem profissional e tosa para todas as raças.</p>
+          <div class="service-price">A partir de <strong>R$ 45</strong><br><small>variação por porte</small></div>
+        </a>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <a href="agendamento" class="service-card">
+          <div class="service-icon" style="background:#FFF3E0">🩺</div>
+          <h5>Consulta Veterinária</h5>
+          <p>Atendimento clínico completo com veterinários especializados.</p>
+          <div class="service-price">A partir de <strong>R$ 120</strong><br><small>por consulta</small></div>
+        </a>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <a href="agendamento" class="service-card">
+          <div class="service-icon" style="background:#FCE4EC">🏨</div>
+          <h5>Pet Hotel</h5>
+          <p>Hospedagem segura e confortável com monitoramento 24h.</p>
+          <div class="service-price">A partir de <strong>R$ 80</strong><br><small>por diária</small></div>
+        </a>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <a href="agendamento" class="service-card">
+          <div class="service-icon" style="background:#E8EAF6">💉</div>
+          <h5>Vacinação</h5>
+          <p>Vacinas importadas e nacionais com caderneta atualizada.</p>
+          <div class="service-price">A partir de <strong>R$ 60</strong><br><small>por vacina</small></div>
+        </a>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <a href="servicos" class="btn-primary-hero" style="display:inline-flex">Ver todos os serviços <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="section-why">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="sec-label" style="color:var(--amber)">Por que nos escolher</span>
+      <h2 class="sec-title" style="color:white">Excelência em cada<br>detalhe</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="why-card">
+          <div class="why-icon">🏆</div>
+          <div>
+            <h5>Profissionais Certificados</h5>
+            <p>Equipe treinada e certificada pelos melhores cursos do país.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="why-card">
+          <div class="why-icon">🔒</div>
+          <div>
+            <h5>Ambiente Seguro</h5>
+            <p>Instalações higienizadas e monitoradas para total segurança.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="why-card">
+          <div class="why-icon">📱</div>
+          <div>
+            <h5>Agendamento Fácil</h5>
+            <p>Marque pelo site, WhatsApp ou telefone. Rápido e simples.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="why-card">
+          <div class="why-icon">❤️</div>
+          <div>
+            <h5>Feito com Amor</h5>
+            <p>Tratamos cada pet como se fosse nosso, com carinho e dedicação.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section-testi">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="sec-label">Depoimentos</span>
+      <h2 class="sec-title">Tutores que amam a<br>PataFeliz</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Minha golden retriever fica super feliz toda vez que vem aqui! O serviço de banho e tosa é impecável e os funcionários são super carinhosos."</p>
+          <div class="testi-author">
+            <div class="avatar" style="background:#E8F5E9">👩</div>
+            <div><div class="testi-name">Ana Paula S.</div><div class="testi-pet">Tutora da Luna 🐕</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Deixo meu gato no pet hotel quando viajo e fico tranquilo. Recebo fotos e atualizações. Atendimento de primeira!"</p>
+          <div class="testi-author">
+            <div class="avatar" style="background:#FFF3E0">👨</div>
+            <div><div class="testi-name">Carlos M.</div><div class="testi-pet">Tutor do Mimi 🐈</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"O veterinário é excelente! Diagnosticou rapidamente o problema do meu dog e o tratamento funcionou muito bem. Super indico!"</p>
+          <div class="testi-author">
+            <div class="avatar" style="background:#FCE4EC">👩</div>
+            <div><div class="testi-name">Fernanda L.</div><div class="testi-pet">Tutora do Thor 🐕</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-cta">
+  <div class="container">
+    <h2 class="sec-title">Seu pet merece o melhor!</h2>
+    <p>Agende agora e ganhe 10% de desconto no primeiro serviço. Oferta válida para novos clientes.</p>
+    <a href="agendamento" class="btn-cta-white">🐾 Agendar agora</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="row gy-4">
+      <div class="col-lg-4">
+        <div class="footer-brand">🐾 Pata<span>Feliz</span></div>
+        <p style="font-size:.88rem; margin-top:.8rem; max-width:280px; line-height:1.7">Cuidando do seu pet com amor e profissionalismo desde 2016.</p>
+        <div class="mt-3">
+          <a href="#" class="social-btn"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="social-btn"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="social-btn"><i class="bi bi-whatsapp"></i></a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6>Navegação</h6>
+        <a href="/">Início</a>
+        <a href="servicos">Serviços</a>
+        <a href="tutores">Tutores</a>
+        <a href="animais">Animais</a>
+        <a href="agendamento">Agendamento</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6>Serviços</h6>
+        <a href="#">Banho & Tosa</a>
+        <a href="#">Consulta Vet.</a>
+        <a href="#">Pet Hotel</a>
+        <a href="#">Vacinação</a>
+        <a href="#">Adestramento</a>
+      </div>
+      <div class="col-lg-3">
+        <h6>Contato</h6>
+        <a href="#"><i class="bi bi-geo-alt me-1"></i> Rua das Flores, 123 – Centro</a>
+        <a href="#"><i class="bi bi-telephone me-1"></i> (11) 9 9999-9999</a>
+        <a href="#"><i class="bi bi-whatsapp me-1"></i> WhatsApp</a>
+        <a href="#"><i class="bi bi-clock me-1"></i> Seg–Sáb: 8h–19h</a>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <p class="footer-copy text-center">© 2025 PataFeliz PetShop. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

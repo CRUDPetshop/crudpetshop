@@ -17,7 +17,7 @@ services:
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-5433}:5432"
 
     networks:
       - projeto_network

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro de Tutores – PataFeliz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/css/tutor.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="/">🐾 Pata<span>Feliz</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="bi bi-list text-white fs-3"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+        <li class="nav-item"><a class="nav-link" href="/">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="servicos">Serviços</a></li>
+        <li class="nav-item"><a class="nav-link active" href="tutores">Tutores</a></li>
+        <li class="nav-item"><a class="nav-link" href="animais">Animais</a></li>
+        <li class="nav-item ms-lg-2"><a class="nav-link btn-nav-cta" href="agendamento">Agendar</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="/">Início</a></li>
+        <li class="breadcrumb-item active">Cadastro de Tutores</li>
+      </ol>
+    </nav>
+    <h1>Cadastro de Tutores</h1>
+    <p>Registre os dados do responsável pelo pet para um atendimento personalizado.</p>
+  </div>
+</div>
+
+<!-- FORM SECTION -->
+<div class="form-section">
+  <div class="container">
+
+    <!-- PROGRESS STEPS -->
+    <div class="steps-bar">
+      <div class="step-item">
+        <div class="step-circle active">1</div>
+        <div class="step-text active">Dados do Tutor</div>
+      </div>
+      <div class="step-connector" style="background:var(--amber);opacity:.3"></div>
+      <div class="step-item">
+        <div class="step-circle pending">2</div>
+        <div class="step-text pending">Cadastro do Pet</div>
+      </div>
+      <div class="step-connector" style="background:#eee"></div>
+      <div class="step-item">
+        <div class="step-circle pending">3</div>
+        <div class="step-text pending">Agendar Serviço</div>
+      </div>
+    </div>
+
+    <div class="row gy-4">
+      <!-- FORM -->
+      <div class="col-lg-8">
+        <div class="form-card">
+          <div class="form-card-header">
+            <div class="form-card-icon">👤</div>
+            <div>
+              <h4>Dados Pessoais</h4>
+              <p>Preencha as informações do tutor responsável</p>
+            </div>
+          </div>
+          <div class="form-body">
+            <form id="tutorForm" novalidate>
+
+              <div class="form-section-label">Informações Pessoais</div>
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">Nome Completo <span class="req">*</span></label>
+                  <input type="text" class="form-control" id="nome" placeholder="Ex: Maria Silva" required>
+                  <div class="invalid-feedback">Por favor, informe o nome completo.</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">CPF <span class="req">*</span></label>
+                  <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" maxlength="14" required>
+                  <div class="invalid-feedback">CPF inválido.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Data de Nascimento</label>
+                  <input type="date" class="form-control" id="nascimento">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Gênero</label>
+                  <select class="form-select" id="genero">
+                    <option value="">Selecione...</option>
+                    <option>Feminino</option>
+                    <option>Masculino</option>
+                    <option>Prefiro não informar</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-section-label">Contato</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">E-mail <span class="req">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" placeholder="email@exemplo.com" required>
+                  </div>
+                  <div class="invalid-feedback">E-mail inválido.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Telefone / WhatsApp <span class="req">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-whatsapp"></i></span>
+                    <input type="tel" class="form-control" id="telefone" placeholder="(11) 9 0000-0000" maxlength="16" required>
+                  </div>
+                  <div class="invalid-feedback">Telefone inválido.</div>
+                </div>
+              </div>
+
+              <div class="form-section-label">Endereço</div>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">CEP</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="cep" placeholder="00000-000" maxlength="9">
+                    <button class="btn btn-outline-secondary" type="button" id="buscarCep" title="Buscar CEP">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Logradouro</label>
+                  <input type="text" class="form-control" id="logradouro" placeholder="Rua, Avenida...">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Número</label>
+                  <input type="text" class="form-control" id="numero" placeholder="123">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Complemento</label>
+                  <input type="text" class="form-control" id="complemento" placeholder="Apto, Bloco...">
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label">Bairro</label>
+                  <input type="text" class="form-control" id="bairro" placeholder="Nome do bairro">
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Cidade</label>
+                  <input type="text" class="form-control" id="cidade" placeholder="São Paulo">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Estado</label>
+                  <select class="form-select" id="estado">
+                    <option value="">UF</option>
+                    <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                    <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                    <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                    <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                    <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                    <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                    <option selected>SP</option><option>SE</option><option>TO</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-section-label">Observações</div>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Como nos conheceu?</label>
+                  <select class="form-select" id="origem">
+                    <option value="">Selecione...</option>
+                    <option>Instagram</option>
+                    <option>Google</option>
+                    <option>Indicação de amigo</option>
+                    <option>Panfleto</option>
+                    <option>Outro</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Observações adicionais</label>
+                  <textarea class="form-control" id="obs" rows="3" placeholder="Informações extras sobre o tutor ou preferências de atendimento..."></textarea>
+                </div>
+                <div class="col-12">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="aceito" required>
+                    <label class="form-check-label" for="aceito" style="font-size:.88rem">
+                      Concordo com os <a href="#" style="color:var(--green)">termos de uso</a> e <a href="#" style="color:var(--green)">política de privacidade</a>. <span class="req">*</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-3 mt-4 flex-wrap">
+                <button type="submit" class="btn-save">
+                  <i class="bi bi-check-circle"></i> Salvar Tutor
+                </button>
+                <button type="button" class="btn-clear" onclick="clearForm()">
+                  <i class="bi bi-arrow-counterclockwise"></i> Limpar
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="col-lg-4">
+        <div class="sidebar-card">
+          <div class="sidebar-header">
+            <h6>Tutores Cadastrados</h6>
+            <span class="badge-count" id="totalCount">0</span>
+          </div>
+          <div class="tutor-list" id="tutorList">
+            <div class="no-tutores">
+              <i class="bi bi-person-plus"></i>
+              Nenhum tutor cadastrado ainda.
+            </div>
+          </div>
+          <div style="padding:1rem 1.2rem; border-top:1px solid rgba(28,74,50,.07)">
+            <a href="animais" class="btn-pet w-100 justify-content-center">
+              <i class="bi bi-arrow-right-circle"></i> Próximo: Cadastrar Pet
+            </a>
+          </div>
+        </div>
+
+        <!-- TIPS CARD -->
+        <div class="mt-3" style="background:white; border-radius:16px; padding:1.3rem; border:1px solid rgba(28,74,50,.08)">
+          <h6 style="font-size:.95rem; margin-bottom:.8rem">💡 Dicas</h6>
+          <ul style="font-size:.82rem; color:#666; line-height:1.8; padding-left:1.2rem; margin:0">
+            <li>Campos com <span style="color:var(--coral)">*</span> são obrigatórios</li>
+            <li>Use o CEP para preencher o endereço automaticamente</li>
+            <li>Após cadastrar o tutor, vincule seus pets</li>
+            <li>O CPF é único por tutor no sistema</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap">
+  <div class="toast-msg" id="toastMsg">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <span id="toastText">Tutor salvo com sucesso!</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/tutor.js"></script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro de Animais – PataFeliz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/css/animais.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="/">🐾 Pata<span>Feliz</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="bi bi-list text-white fs-3"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+        <li class="nav-item"><a class="nav-link" href="/">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="servicos">Serviços</a></li>
+        <li class="nav-item"><a class="nav-link" href="tutores">Tutores</a></li>
+        <li class="nav-item"><a class="nav-link active" href="animais">Animais</a></li>
+        <li class="nav-item ms-lg-2"><a class="nav-link btn-nav-cta" href="agendamento">Agendar</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="/">Início</a></li>
+        <li class="breadcrumb-item"><a href="tutores">Tutores</a></li>
+        <li class="breadcrumb-item active">Cadastro de Animais</li>
+      </ol>
+    </nav>
+    <h1>Cadastro de Animais</h1>
+    <p>Registre os dados do pet para histórico de atendimento e agendamento de serviços.</p>
+  </div>
+</div>
+
+<!-- FORM SECTION -->
+<div class="form-section">
+  <div class="container">
+    <!-- STEPS -->
+    <div class="steps-bar">
+      <div class="step-item">
+        <a id="stepTutorLink" href="tutores" style="display:flex;align-items:center;gap:.5rem;text-decoration:none;" title="Voltar e editar tutor">
+          <div class="step-circle done" style="cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'"><i class="bi bi-check"></i></div>
+          <div class="step-text done" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px">Dados do Tutor</div>
+        </a>
+      </div>
+      <div class="step-connector" style="background:var(--green);opacity:.4"></div>
+      <div class="step-item">
+        <div class="step-circle active">2</div>
+        <div class="step-text active">Cadastro do Pet</div>
+      </div>
+      <div class="step-connector" style="background:#eee"></div>
+      <div class="step-item">
+        <div class="step-circle pending">3</div>
+        <div class="step-text pending">Agendar Serviço</div>
+      </div>
+    </div>
+
+    <div class="row gy-4">
+      <!-- FORM -->
+      <div class="col-lg-8">
+        <div class="form-card">
+          <div class="form-card-header">
+            <div class="form-card-icon">🐾</div>
+            <div>
+              <h4>Dados do Pet</h4>
+              <p>Informações completas do animal para melhor atendimento</p>
+            </div>
+          </div>
+          <div class="form-body">
+            <form id="petForm" novalidate>
+
+              <!-- TUTOR LINK -->
+              <div class="form-section-label">Vincular ao Tutor</div>
+              <div class="row g-3 mb-2">
+                <div class="col-md-8">
+                  <label class="form-label">Tutor Responsável <span class="req">*</span></label>
+                  <select class="form-select" id="tutorId" required onchange="onTutorChange()">
+                    <option value="">Selecione o tutor...</option>
+                  </select>
+                  <div class="invalid-feedback">Selecione um tutor.</div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end gap-2 flex-column fixPosition">
+                  <a id="btnEditarTutor" href="tutores" class="btn w-100" style="border-radius:10px;font-size:.82rem;background:#E8F5E9;color:var(--green);border:1.5px solid var(--green);font-weight:600;display:none">
+                    <i class="bi bi-pencil-square"></i> Editar Tutor
+                  </a>
+                  <a href="tutores" class="btn btn-outline-secondary w-100" style="border-radius:10px;font-size:.82rem;">
+                    <i class="bi bi-person-plus"></i> Novo Tutor
+                  </a>
+                </div>
+              </div>
+
+              <!-- SPECIE -->
+              <div class="form-section-label">Espécie <span class="req">*</span></div>
+              <div class="specie-grid" id="specieGrid">
+                <button type="button" class="specie-btn" data-value="Cachorro" onclick="selectSpecie(this)">
+                  <span class="emoji">🐶</span>Cachorro
+                </button>
+                <button type="button" class="specie-btn" data-value="Gato" onclick="selectSpecie(this)">
+                  <span class="emoji">🐱</span>Gato
+                </button>
+                <button type="button" class="specie-btn" data-value="Coelho" onclick="selectSpecie(this)">
+                  <span class="emoji">🐰</span>Coelho
+                </button>
+                <button type="button" class="specie-btn" data-value="Pássaro" onclick="selectSpecie(this)">
+                  <span class="emoji">🐦</span>Pássaro
+                </button>
+                <button type="button" class="specie-btn" data-value="Hamster" onclick="selectSpecie(this)">
+                  <span class="emoji">🐹</span>Hamster
+                </button>
+                <button type="button" class="specie-btn" data-value="Peixe" onclick="selectSpecie(this)">
+                  <span class="emoji">🐠</span>Peixe
+                </button>
+                <button type="button" class="specie-btn" data-value="Réptil" onclick="selectSpecie(this)">
+                  <span class="emoji">🦎</span>Réptil
+                </button>
+                <button type="button" class="specie-btn" data-value="Outro" onclick="selectSpecie(this)">
+                  <span class="emoji">🐾</span>Outro
+                </button>
+              </div>
+              <input type="hidden" id="especie" required>
+              <div id="especieError" style="display:none; color:var(--coral); font-size:.8rem; margin-top:.3rem;">Selecione a espécie.</div>
+
+              <!-- BASIC INFO -->
+              <div class="form-section-label">Informações Básicas</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Nome do Pet <span class="req">*</span></label>
+                  <input type="text" class="form-control" id="petNome" placeholder="Ex: Rex, Luna, Mimi..." required>
+                  <div class="invalid-feedback">Informe o nome do pet.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Raça</label>
+                  <input type="text" class="form-control" id="raca" placeholder="Ex: Golden Retriever, SRD...">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Cor / Pelagem</label>
+                  <input type="text" class="form-control" id="cor" placeholder="Ex: Caramelo, Preto e branco...">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Sexo <span class="req">*</span></label>
+                  <select class="form-select" id="sexo" required>
+                    <option value="">Selecione...</option>
+                    <option>Macho</option>
+                    <option>Fêmea</option>
+                  </select>
+                  <div class="invalid-feedback">Informe o sexo.</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Data de Nascimento</label>
+                  <input type="date" class="form-control" id="petNasc">
+                </div>
+              </div>
+
+              <!-- PORTE -->
+              <div class="form-section-label">Porte do Animal</div>
+              <div class="porte-grid" id="porteGrid">
+                <button type="button" class="porte-btn" data-value="Miniatura" onclick="selectPorte(this)">
+                  <span class="porte-icon">🐭</span>Miniatura<br><small style="font-weight:400;font-size:.7rem">até 4kg</small>
+                </button>
+                <button type="button" class="porte-btn" data-value="Pequeno" onclick="selectPorte(this)">
+                  <span class="porte-icon">🐕</span>Pequeno<br><small style="font-weight:400;font-size:.7rem">4–10kg</small>
+                </button>
+                <button type="button" class="porte-btn" data-value="Médio" onclick="selectPorte(this)">
+                  <span class="porte-icon">🐕‍🦺</span>Médio<br><small style="font-weight:400;font-size:.7rem">10–25kg</small>
+                </button>
+                <button type="button" class="porte-btn" data-value="Grande" onclick="selectPorte(this)">
+                  <span class="porte-icon">🦮</span>Grande<br><small style="font-weight:400;font-size:.7rem">acima 25kg</small>
+                </button>
+              </div>
+              <input type="hidden" id="porte">
+
+              <!-- HEALTH -->
+              <div class="form-section-label">Saúde e Condições</div>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Castrado?</label>
+                  <select class="form-select" id="castrado">
+                    <option value="">Selecione...</option>
+                    <option>Sim</option>
+                    <option>Não</option>
+                    <option>Não sei</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Peso (kg)</label>
+                  <input type="number" class="form-control" id="peso" placeholder="Ex: 8.5" min="0" max="200" step="0.1">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Microchip Nº</label>
+                  <input type="text" class="form-control" id="microchip" placeholder="Código do chip">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Condições de Saúde</label>
+                  <div class="health-check-list">
+                    <label class="health-item"><input type="checkbox" name="cond" value="Alergia"> 🤧 Alergia</label>
+                    <label class="health-item"><input type="checkbox" name="cond" value="Cardiopatia"> ❤️ Cardiopatia</label>
+                    <label class="health-item"><input type="checkbox" name="cond" value="Diabetes"> 🍬 Diabetes</label>
+                    <label class="health-item"><input type="checkbox" name="cond" value="Epilepsia"> ⚡ Epilepsia</label>
+                    <label class="health-item"><input type="checkbox" name="cond" value="Artrite"> 🦴 Artrite</label>
+                    <label class="health-item"><input type="checkbox" name="cond" value="Outra"> ➕ Outra</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Medicamentos em uso</label>
+                  <input type="text" class="form-control" id="medicamentos" placeholder="Ex: Simparic, Bravecto...">
+                </div>
+              </div>
+
+              <!-- VACCINATION -->
+              <div class="form-section-label">Vacinação</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Última vacinação</label>
+                  <input type="date" class="form-control" id="ultimaVacina">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Próxima vacina</label>
+                  <input type="date" class="form-control" id="proximaVacina">
+                </div>
+              </div>
+
+              <!-- BEHAVIOR -->
+              <div class="form-section-label">Comportamento</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Temperamento</label>
+                  <select class="form-select" id="temperamento">
+                    <option value="">Selecione...</option>
+                    <option>Dócil / Calmo</option>
+                    <option>Agitado / Brincalhão</option>
+                    <option>Tímido</option>
+                    <option>Agressivo com pessoas</option>
+                    <option>Agressivo com outros animais</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Reação ao banho</label>
+                  <select class="form-select" id="reacaoBanho">
+                    <option value="">Selecione...</option>
+                    <option>Tranquilo</option>
+                    <option>Nervoso</option>
+                    <option>Agressivo</option>
+                    <option>Não sabe / Primeira vez</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Observações especiais</label>
+                  <textarea class="form-control" id="petObs" rows="3" placeholder="Alergias a produtos, medos específicos, cuidados especiais..."></textarea>
+                </div>
+              </div>
+
+              <div class="d-flex gap-3 mt-4 flex-wrap">
+                <button type="submit" class="btn-save">
+                  <i class="bi bi-check-circle"></i> Salvar Animal
+                </button>
+                <a href="agendamento" class="btn-schedule">
+                  <i class="bi bi-calendar-check"></i> Agendar Serviço
+                </a>
+                <button type="button" class="btn-clear" onclick="clearPetForm()">
+                  <i class="bi bi-arrow-counterclockwise"></i> Limpar
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="col-lg-4">
+        <div class="sidebar-card">
+          <div class="sidebar-header">
+            <h6>Pets Cadastrados</h6>
+            <span class="badge-count" id="totalPets">0</span>
+          </div>
+          <div class="pet-list" id="petList">
+            <div class="no-pets">
+              <i class="bi bi-paw"></i>
+              Nenhum pet cadastrado ainda.
+            </div>
+          </div>
+          <div style="padding:1rem 1.2rem; border-top:1px solid rgba(28,74,50,.07)">
+            <a href="agendamento" class="btn-schedule w-100 justify-content-center" style="display:flex">
+              <i class="bi bi-calendar-check"></i> Ir para Agendamento
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-3" style="background:white; border-radius:16px; padding:1.3rem; border:1px solid rgba(28,74,50,.08)">
+          <h6 style="font-size:.95rem; margin-bottom:.8rem">🐾 Dicas</h6>
+          <ul style="font-size:.82rem; color:#666; line-height:1.8; padding-left:1.2rem; margin:0">
+            <li>Vincule o pet a um tutor cadastrado</li>
+            <li>Informe condições de saúde para cuidados especiais</li>
+            <li>O temperamento ajuda no preparo do banho</li>
+            <li>Após cadastrar, clique em "Agendar Serviço"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap">
+  <div class="toast-msg" id="toastMsg">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <span id="toastText">Pet salvo com sucesso!</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/animal.js" defer></script>
+</body>
+</html>
