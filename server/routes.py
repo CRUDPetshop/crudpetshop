@@ -60,7 +60,7 @@ def atualiza_tutor(req, res):
 #Rota de cadastro para atualizar pet
 @router.put('/api/att_pet/:id')
 def atualiza_pet(req, res):
-    id = int(req.params("id")[0])
+    id = int(req.params["id"][0])
     dados = req.body
     pet = db.atualizar_pet(id, dados)
 
@@ -78,7 +78,7 @@ def delete_tutor(req, res):
 #Rota de delete pet
 @router.delete('/api/del_pet/:id')
 def delete_pet(req, res):
-    id_pet = req.params("id")
+    id_pet = req.params["id"]
     db.deletar_pet(id_pet)
     return res.json({
         "message": "Pet deletado."
