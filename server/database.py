@@ -144,6 +144,19 @@ class Database:
         """
              
         return self.execute_query(query)
+
+
+    def lista_pet_id(self, id):
+
+        query = """
+            SELECT *
+            FROM animais
+            WHERE id = %s;
+        """
+
+        result =  self.execute_query(query, (id,))
+        return result[0] if result else None
+
     
     def cadastrar_tutor(self, dados):
         query = """
@@ -163,6 +176,9 @@ class Database:
         return self._convert_dates(tutor)
     
     def cadastrar_pet(self, dados):
+        dados['ultima_vacina'] = dados.get('ultima_vacina') or None
+        dados['proxima_vacina'] = dados.get('proxima_vacina') or None
+
         query = """
             INSERT INTO animais(
                 tutor_id, especie, nome, raca, cor, sexo,
@@ -208,6 +224,9 @@ class Database:
 
 
     def atualizar_pet(self, id, dados):
+        dados['ultima_vacina'] = dados.get('ultima_vacina') or None
+        dados['proxima_vacina'] = dados.get('proxima_vacina') or None
+
         query = """
             UPDATE animais
             SET
@@ -231,9 +250,11 @@ class Database:
             WHERE id = %(id)s
             RETURNING *;
         """
+
         dados["id"] = id
         pet = self.execute_query(query, dados)
         return pet[0] if pet else None
+
     
     def deletar_tutor(self, id):
         query = """

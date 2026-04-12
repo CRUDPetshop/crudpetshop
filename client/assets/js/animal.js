@@ -36,15 +36,16 @@ function selectPorte(btn){
 async function loadTutoresList(){
     try {
         const r = await fetch(`${API}/tutores`);
-        const tutores = await r.json();
+        const tutor = await r.json();
         const sel = document.getElementById('tutorId');
+
         // manter opção padrão
         sel.innerHTML = '<option value="">Selecione o tutor...</option>';
-        tutores.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = `${t.nome} – ${t.telefone || ''}`;
-        sel.appendChild(opt);
+        tutor.tutores.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = `${t.nome} – ${t.telefone || ''}`;
+            sel.appendChild(opt);
         });
     } catch {
         showToast('Erro ao carregar tutores.', true);
@@ -90,9 +91,9 @@ function renderPetList(pets){
 // ── Busca lista de pets do servidor ──
 async function fetchPetList(){
     try {
-        const r = await fetch(`${API}/animais`);
+        const r = await fetch(`${API}/pet`);
         const data = await r.json();
-        renderPetList(data);
+        renderPetList(data?.pets);
     } catch {
         showToast('Erro ao carregar animais.', true);
     }
@@ -122,7 +123,7 @@ function fillPetForm(p){
       b.classList.toggle('selected', b.dataset.value === p.especie));
     document.querySelectorAll('.porte-btn').forEach(b =>
       b.classList.toggle('selected', b.dataset.value === p.porte));
-    const condicoes = p.condicoes ? p.condicoes.split(',') : [];
+    const condicoes = p.condicoes ? p.condicoes.replace(/[{}]/g, '').split(',') : [];
     document.querySelectorAll('[name="cond"]').forEach(c =>
       c.checked = condicoes.includes(c.value));
     onTutorChange();
@@ -131,9 +132,10 @@ function fillPetForm(p){
 // ── Carrega animal por ID do banco ──
 async function loadPet(id){
     try {
-        const r = await fetch(`${API}/animais/${id}`);
+        const r = await fetch(`${API}/pet/${id}`);
         if (!r.ok) throw new Error();
         const p = await r.json();
+
         fillPetForm(p);
         await fetchPetList();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -147,7 +149,7 @@ async function deletePet(e, id){
     e.stopPropagation();
     if (!confirm('Remover este animal?')) return;
     try {
-        const r = await fetch(`${API}/animais/${id}`, { method: 'DELETE' });
+        const r = await fetch(`${API}/del_pet/${id}`, { method: 'DELETE' });
         if (!r.ok) throw new Error();
         if (String(editPetId) === String(id)) clearPetForm();
         showToast('Animal removido.');
@@ -203,7 +205,7 @@ document.getElementById('petForm').addEventListener('submit', async function(e){
     setLoading(true);
     try {
         const isEdit = editPetId !== null;
-        const url    = isEdit ? `${API}/animais/${editPetId}` : `${API}/animais`;
+        const url    = isEdit ? `${API}/att_pet/${editPetId}` : `${API}/cad_pet`;
         const method = isEdit ? 'PUT' : 'POST';
 
         const r = await fetch(url, {
