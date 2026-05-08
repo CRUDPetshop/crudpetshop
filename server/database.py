@@ -157,6 +157,17 @@ class Database:
         result =  self.execute_query(query, (id,))
         return result[0] if result else None
 
+    def lista_pet_tutor_id(self, id):
+
+        query = """
+            SELECT *
+            FROM animais
+            WHERE tutor_id = %s;
+        """
+
+        result =  self.execute_query(query, (id,))
+        return result[0] if result else None
+
     
     def cadastrar_tutor(self, dados):
         query = """

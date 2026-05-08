@@ -28,6 +28,13 @@ def lista_pet_id(req, res):
     tutor = db.lista_pet_id(id)
     return res.json(tutor)
 
+#Rota para listar pets por ID de tutor
+@router.get('/api/pet_tutor/:id')
+def lista_pet_tutor_id(req, res):
+    id = int(req.params["id"][0])
+    pet_tutor = db.lista_pet_tutor_id(id)
+    return res.json(pet_tutor)
+
 #Rota para listar pets
 @router.get('/api/pet')
 def lista_pets(req, res):
