@@ -98,13 +98,36 @@ def delete_pet(req, res):
         "message": "Pet deletado."
     })
 
-#Rota para Agendamentos
-@router.post('api/agendamentos')
+#Rota para cadastrar agendamentos
+@router.post('/api/agendamentos')
 def cria_agendamento(req, res):
     dados = req.body
-    agendamento = db.criar_agendamento(dados)
+    agendamento = db.cadastrar_agendamento(dados)
     return res.json({
         "message": "Serviço agendado com sucesso",
         "agendamento": agendamento
     })
 
+#Rota para cadastrar agendamento
+@router.get('/api/agendamentos')
+def listar_todos_agendamentos(req, res):
+    agendamentos = db.listar_todos_agendamentos()
+    return res.json(agendamentos)
+
+#Rota para atualizar agendamento
+@router.put('/api/att_agendamento/:id')
+def atualizar_agendamento(req, res):
+    id = int(req.params["id"][0])
+    dados = req.body
+    agendamento = db.atualizar_agendamento(id, dados)
+
+    return res.json(agendamento)
+
+#Rota de delete de agendamento
+@router.delete('/api/del_agendamento/:id')
+def deletar_agendamento(req, res):
+    id_agendamento = req.params["id"]
+    db.deletar_agendamento(id_agendamento)
+    return res.json({
+        "message": "Agendamento deletado."
+    })

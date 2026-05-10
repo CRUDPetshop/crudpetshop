@@ -166,7 +166,7 @@ class Database:
         """
 
         result =  self.execute_query(query, (id,))
-        return result[0] if result else None
+        return result
 
     
     def cadastrar_tutor(self, dados):
@@ -285,7 +285,7 @@ class Database:
             cursor.execute(query, (id,))
             self.conn.commit()
 
-    def criar_agendamento(self, dados):
+    def cadastrar_agendamento(self, dados):
         query = """
                 INSERT INTO agendamentos (
                 tutor_id,
@@ -316,5 +316,58 @@ class Database:
             RETURNING *;
         """
 
-        agendamento = self._convert_dates(query, dados)
+        agendamento = self.execute_query(query, dados)
         return self._convert_dates(agendamento)
+
+    def listar_todos_agendamentos(self):
+
+        query = """
+            SELECT
+                ag.id,
+                ag.horario,
+                ag.servico,
+                ag.data,
+                ag.addons,
+                ag.status,
+                ag.total,
+                ag.pagamento,
+                ag.obs,
+                animais.nome as animal_nome,
+                animais.especie as animal_especie,
+                tutores.nome as tutor_nome
+            FROM
+                agendamentos ag
+            INNER JOIN
+                animais ON animais.id = ag.animal_id
+            INNER JOIN
+                tutores ON tutores.id = ag.tutor_id
+        """
+
+        return self.execute_query(query)
+
+    def atualizar_agendamento(self, id, dados):
+
+        query = """
+            UPDATE 
+                agendamentos
+            SET
+                status = %(status)s,
+                pagamento = %(pagamento)s,
+                obs = %(obs)s
+            WHERE 
+                id = %(id)s
+            RETURNING *;
+        """
+
+        dados["id"] = id
+        agendamento = self.execute_query(query, dados)
+        return agendamento[0] if agendamento else None
+
+    def deletar_agendamento(self, id):
+        query = """
+            DELETE FROM agendamentos
+            WHERE id = %s;
+        """
+        with self.conn.cursor() as cursor:
+            cursor.execute(query, (id,))
+            self.conn.commit()
