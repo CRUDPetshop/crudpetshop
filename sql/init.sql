@@ -56,3 +56,31 @@ CREATE TABLE IF NOT EXISTS agendamentos (
     total       NUMERIC(10,2),
     criado_em   TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS transportes (
+    id                  SERIAL PRIMARY KEY,
+    agendamento_id      INTEGER NOT NULL REFERENCES agendamentos(id) ON DELETE CASCADE,
+    tem_busca           BOOLEAN NOT NULL DEFAULT FALSE,
+    tem_entrega         BOOLEAN NOT NULL DEFAULT FALSE,
+    horario_busca       TIME,
+    horario_entrega     TIME,
+    obs_busca           TEXT,
+    obs_entrega         TEXT,
+    busca_cep           VARCHAR(10),
+    busca_logradouro    VARCHAR(200),
+    busca_numero        VARCHAR(20),
+    busca_complemento   VARCHAR(100),
+    busca_bairro        VARCHAR(100),
+    busca_cidade        VARCHAR(100),
+    busca_estado        CHAR(2),
+    entrega_cep         VARCHAR(10),
+    entrega_logradouro  VARCHAR(200),
+    entrega_numero      VARCHAR(20),
+    entrega_complemento VARCHAR(100),
+    entrega_bairro      VARCHAR(100),
+    entrega_cidade      VARCHAR(100),
+    entrega_estado      CHAR(2),
+    status              VARCHAR(30) NOT NULL DEFAULT 'Agendado',
+    taxa                NUMERIC(8,2),
+    criado_em           TIMESTAMP DEFAULT NOW()
+);

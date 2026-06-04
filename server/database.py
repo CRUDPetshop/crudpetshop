@@ -74,7 +74,7 @@ class Database:
                     row[key] = float(value)
         return row
     
-    def execute_query(self, query: str, params=None, fetch: bool = True):
+    def execute_query(self, query: str, params=None, fetch: bool = True, commit: bool = True):
         """
         Executa uma query SQL.
 
@@ -93,11 +93,13 @@ class Database:
 
             if fetch:
                 results = cursor.fetchall()
-                self.conn.commit()
+                if commit: 
+                    self.conn.commit()
                 cursor.close()
                 return [self._convert_dates(dict(row)) for row in results]
             else:
-                self.conn.commit()
+                if commit:
+                    self.conn.commit()
                 cursor.close()
                 return None
 
@@ -286,38 +288,120 @@ class Database:
             self.conn.commit()
 
     def cadastrar_agendamento(self, dados):
-        query = """
-                INSERT INTO agendamentos (
-                tutor_id,
-                animal_id,
-                servico,
-                addons,
-                data,
-                horario,
-                pagamento,
-                notificacao,
-                obs,
-                status,
-                total
-            )
-            VALUES (
-                %(tutor_id)s,
-                %(animal_id)s,
-                %(servico)s,
-                %(addons)s,
-                %(data)s,
-                %(horario)s,
-                %(pagamento)s,
-                %(notificacao)s,
-                %(obs)s,
-                %(status)s,
-                %(total)s
-            )
-            RETURNING *;
-        """
 
-        agendamento = self.execute_query(query, dados)
-        return self._convert_dates(agendamento)
+        try: 
+            query = """
+                INSERT INTO agendamentos (
+                    tutor_id,
+                    animal_id,
+                    servico,
+                    addons,
+                    data,
+                    horario,
+                    pagamento,
+                    notificacao,
+                    obs,
+                    status,
+                    total
+                )
+                VALUES (
+                    %(tutor_id)s,
+                    %(animal_id)s,
+                    %(servico)s,
+                    %(addons)s,
+                    %(data)s,
+                    %(horario)s,
+                    %(pagamento)s,
+                    %(notificacao)s,
+                    %(obs)s,
+                    %(status)s,
+                    %(total)s
+                )
+                RETURNING *;
+            """
+
+            agendamento = self.execute_query(query, dados, True, False)
+            print(agendamento[0]["id"])
+            dados['id_agendamento'] = agendamento[0]["id"]
+        
+
+            if dados.get("tem_busca") or dados.get("tem_entrega"):
+
+                dados["id_agendamento"] = agendamento
+
+                query_transporte = """
+                    INSERT INTO transportes (
+                        agendamento_id,
+                        tem_busca,
+                        tem_entrega,
+                        horario_busca,
+                        horario_entrega,
+                        obs_busca,
+                        obs_entrega,
+                        busca_cep,
+                        busca_logradouro,
+                        busca_numero,
+                        busca_complemento,
+                        busca_bairro,
+                        busca_cidade,
+                        busca_estado,
+                        entrega_cep,
+                        entrega_logradouro,
+                        entrega_numero,
+                        entrega_complemento,
+                        entrega_bairro,
+                        entrega_cidade,
+                        entrega_estado,
+                        status,
+                        taxa
+                    )
+                    VALUES (
+                        %(agendamento_id)s,
+                        %(tem_busca)s,
+                        %(tem_entrega)s,
+                        %(horario_busca)s,
+                        %(horario_entrega)s,
+                        %(obs_busca)s,
+                        %(obs_entrega)s,
+                        %(busca_cep)s,
+                        %(busca_logradouro)s,
+                        %(busca_numero)s,
+                        %(busca_complemento)s,
+                        %(busca_bairro)s,
+                        %(busca_cidade)s,
+                        %(busca_estado)s,
+                        %(entrega_cep)s,
+                        %(entrega_logradouro)s,
+                        %(entrega_numero)s,
+                        %(entrega_complemento)s,
+                        %(entrega_bairro)s,
+                        %(entrega_cidade)s,
+                        %(entrega_estado)s,
+                        %(status)s,
+                        %(taxa)s
+                    )
+                    RETURNING *;
+                """
+
+                transporte = self.execute_query(
+                    query_transporte,
+                    dados,
+                    fetch=True,
+                    commit=False
+                )
+
+                if not transporte:
+                    raise Exception("Erro ao cadastrar transporte")
+                
+            self.conn.commit()
+
+            return agendamento[0]
+        
+        except Exception as e:
+        
+            self.conn.rollback()
+            print(f"Erro ao cadastrar: {e}")
+            raise
 
     def listar_todos_agendamentos(self):
 
