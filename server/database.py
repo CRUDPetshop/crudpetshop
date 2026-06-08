@@ -321,13 +321,27 @@ class Database:
             """
 
             agendamento = self.execute_query(query, dados, True, False)
-            print(agendamento[0]["id"])
             dados['id_agendamento'] = agendamento[0]["id"]
         
+            t = dados.get('transporte') or {}
 
-            if dados.get("tem_busca") or dados.get("tem_entrega"):
+            if t.get('busca') or t.get('entrega'):
 
-                dados["id_agendamento"] = agendamento
+                addr_tutor = t.get('addr_tutor') or {}
+                addr_busca_raw = t.get('addr_busca')
+                addr_entrega_raw = t.get('addr_entrega')
+
+                addr_busca = (addr_busca_raw if isinstance(addr_busca_raw, dict) else None) or addr_tutor
+                addr_entrega = (addr_entrega_raw if isinstance(addr_entrega_raw, dict) else None) or addr_tutor
+
+                addr_keys = ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado']
+
+                transporte_payload = {
+                    **{k: v for k, v in t.items() if k not in ('addr_busca', 'addr_entrega', 'addr_tutor')},
+                    'agendamento_id': dados['id_agendamento'],
+                    **{f'busca_{k}': addr_busca.get(k) for k in addr_keys},
+                    **{f'entrega_{k}': addr_entrega.get(k) for k in addr_keys},
+                }
 
                 query_transporte = """
                     INSERT INTO transportes (
@@ -351,42 +365,38 @@ class Database:
                         entrega_complemento,
                         entrega_bairro,
                         entrega_cidade,
-                        entrega_estado,
-                        status,
-                        taxa
+                        entrega_estado
                     )
                     VALUES (
                         %(agendamento_id)s,
-                        %(tem_busca)s,
-                        %(tem_entrega)s,
+                        %(busca)s,
+                        %(entrega)s,
                         %(horario_busca)s,
                         %(horario_entrega)s,
                         %(obs_busca)s,
                         %(obs_entrega)s,
-                        %(busca_cep)s,
-                        %(busca_logradouro)s,
-                        %(busca_numero)s,
-                        %(busca_complemento)s,
-                        %(busca_bairro)s,
-                        %(busca_cidade)s,
+                        %(busca_cep)s, 
+                        %(busca_logradouro)s, 
+                        %(busca_numero)s, 
+                        %(busca_complemento)s, 
+                        %(busca_bairro)s, 
+                        %(busca_cidade)s, 
                         %(busca_estado)s,
-                        %(entrega_cep)s,
-                        %(entrega_logradouro)s,
-                        %(entrega_numero)s,
-                        %(entrega_complemento)s,
-                        %(entrega_bairro)s,
-                        %(entrega_cidade)s,
-                        %(entrega_estado)s,
-                        %(status)s,
-                        %(taxa)s
+                        %(entrega_cep)s, 
+                        %(entrega_logradouro)s, 
+                        %(entrega_numero)s, 
+                        %(entrega_complemento)s, 
+                        %(entrega_bairro)s, 
+                        %(entrega_cidade)s, 
+                        %(entrega_estado)s
                     )
                     RETURNING *;
                 """
 
                 transporte = self.execute_query(
-                    query_transporte,
-                    dados,
-                    fetch=True,
+                    query_transporte, 
+                    transporte_payload, 
+                    fetch=True, 
                     commit=False
                 )
 

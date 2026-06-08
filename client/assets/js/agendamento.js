@@ -10,7 +10,6 @@ function showToast(msg, isErr = false){
 	setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ── Carrega tutores ──
 async function loadTutores(){
 	try {
 		const r = await fetch(`${API}/tutores`);
@@ -26,7 +25,6 @@ async function loadTutores(){
 	} catch { showToast('Erro ao carregar tutores.', true); }
 }
 
-// ── Ao selecionar tutor, carrega seus pets ──
 document.getElementById('agTutor').addEventListener('change', async function(){
 	const petSel = document.getElementById('agPet');
 	petSel.innerHTML = '<option value="">Selecione o pet...</option>';
@@ -47,7 +45,6 @@ document.getElementById('agTutor').addEventListener('change', async function(){
 	updateSummary();
 });
 
-// ── Ao selecionar pet, exibe card ──
 document.getElementById('agPet').addEventListener('change', function(){
 	const p = petsCache.find(p => String(p.id) === String(this.value));
 	const disp = document.getElementById('petDisplay');
@@ -68,7 +65,6 @@ document.getElementById('agPet').addEventListener('change', function(){
 	updateSummary();
 });
 
-// ── Data mínima ──
 document.getElementById('agData').min = new Date().toISOString().split('T')[0];
 document.getElementById('agData').addEventListener('change', updateSummary);
 
@@ -136,8 +132,10 @@ document.getElementById('agendForm').addEventListener('submit', async function(e
 	const notificacao  = document.getElementById('notificacao').value;
 	const obs          = document.getElementById('agObs').value;
 
+	const entregaData = getEntregaPayload();
 	const payload = { tutor_id: tutorId || null, animal_id: petId || null,
-		servico, addons, data, horario, pagamento, notificacao, obs, total, status: 'Confirmado' };
+		servico, addons, data, horario, pagamento, notificacao, obs, total, status: 'Confirmado',
+		transporte: entregaData };
 
 	const saveBtn = this.querySelector('.btn-save');
 	saveBtn.disabled = true;
@@ -145,14 +143,13 @@ document.getElementById('agendForm').addEventListener('submit', async function(e
 
 	try {
 		const r = await fetch(`${API}/agendamentos`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(payload),
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload),
 		});
 		const ag = await r.json();
 		if (!r.ok){ showToast(ag.error || 'Erro ao agendar.', true); return; }
 
-		// Show confirm screen
 		document.getElementById('formBody').style.display = 'none';
 		const cs = document.getElementById('confirmScreen');
 		cs.style.display = 'block';
@@ -168,6 +165,11 @@ document.getElementById('agendForm').addEventListener('submit', async function(e
 			<div><b>🕐 Horário:</b> ${horario}</div>
 			<div><b>💰 Total:</b> R$ ${total}</div>
 			${pagamento ? `<div><b>💳 Pagamento:</b> ${pagamento}</div>` : ''}
+			${entregaData ? `<div style="margin-top:.4rem;padding-top:.4rem;border-top:1px solid #eee">
+				${entregaData.busca ? '<div><b>🚗 Busca:</b> ' + (entregaData.horario_busca || 'horário a combinar') + '</div>' : ''}
+				${entregaData.entrega ? '<div><b>📦 Entrega:</b> ' + (entregaData.horario_entrega || 'horário a combinar') + '</div>' : ''}
+				${entregaData.endereco_diferente ? '<div><b>📍 Endereço alternativo:</b> ' + [entregaData.alt_logradouro, entregaData.alt_numero, entregaData.alt_bairro, entregaData.alt_cidade].filter(Boolean).join(', ') + '</div>' : ''}
+			</div>` : ''}
 		</div>`;
 
 		await fetchHistory();
@@ -197,7 +199,141 @@ function resetAgendamento(){
 	petsCache = [];
 }
 
-// ── Agendamentos: estado e filtro ──
+const entregaState = { busca: false, entrega: false };
+let tutorAddrCache = null;
+
+function toggleEntrega(tipo) {
+	entregaState[tipo] = !entregaState[tipo];
+	document.getElementById(tipo === 'busca' ? 'toggleBusca' : 'toggleEntrega')
+		.classList.toggle('active', entregaState[tipo]);
+	document.getElementById(tipo === 'busca' ? 'buscaFields' : 'entregaFields')
+		.classList.toggle('open', entregaState[tipo]);
+	if (!entregaState[tipo]) resetAddrBlock(tipo);
+	updateAddrPreviews();
+}
+
+function resetAddrBlock(tipo) {
+	document.getElementById(tipo+'EnderecoDif').checked = false;
+	document.getElementById(tipo+'AddrFields').style.display = 'none';
+	['Cep','Logradouro','Numero','Complemento','Bairro','Cidade'].forEach(f => {
+		document.getElementById(tipo+f).value = '';
+	});
+	document.getElementById(tipo+'Estado').value = '';
+}
+
+function toggleAddrFields(tipo) {
+	const checked = document.getElementById(tipo+'EnderecoDif').checked;
+	document.getElementById(tipo+'AddrFields').style.display = checked ? '' : 'none';
+	if (!checked) {
+		['Cep','Logradouro','Numero','Complemento','Bairro','Cidade'].forEach(f =>
+			document.getElementById(tipo+f).value = '');
+		document.getElementById(tipo+'Estado').value = '';
+	}
+}
+
+function updateAddrPreviews() {
+	if (!tutorAddrCache) return;
+
+	const partes = [
+		tutorAddrCache.logradouro, tutorAddrCache.numero,
+		tutorAddrCache.complemento, tutorAddrCache.bairro,
+		tutorAddrCache.cidade, tutorAddrCache.estado, tutorAddrCache.cep
+	].filter(Boolean).join(', ');
+
+	console.log(partes)
+
+	const txt = partes || 'Endereço não cadastrado';
+
+	['busca','entrega'].forEach(tipo => {
+		const preview = document.getElementById('addr'+tipo.charAt(0).toUpperCase()+tipo.slice(1)+'Preview');
+		const span    = document.getElementById('addr'+tipo.charAt(0).toUpperCase()+tipo.slice(1)+'Text');
+		if (entregaState[tipo] && partes) {
+			span.textContent = txt;
+			preview.style.display = '';
+		} else {
+			preview.style.display = 'none';
+		}
+	});
+}
+
+function maskCep(el) {
+	let v = el.value.replace(/[^0-9]/g,'').slice(0,8);
+	if (v.length > 5) v = v.slice(0,5)+'-'+v.slice(5);
+	el.value = v;
+}
+
+function buscarCep(tipo) {
+	const cep = document.getElementById(tipo+'Cep').value.replace(/[^0-9]/g,'');
+	if (cep.length !== 8) { showToast('CEP inválido!', true); return; }
+	const btnId = 'btnCep' + tipo.charAt(0).toUpperCase() + tipo.slice(1);
+	const btn = document.getElementById(btnId);
+	btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+	btn.disabled = true;
+	fetch('https://viacep.com.br/ws/'+cep+'/json/')
+		.then(r => r.json())
+		.then(d => {
+			if (d.erro) { showToast('CEP não encontrado.', true); return; }
+			document.getElementById(tipo+'Logradouro').value = d.logradouro || '';
+			document.getElementById(tipo+'Bairro').value     = d.bairro     || '';
+			document.getElementById(tipo+'Cidade').value     = d.localidade || '';
+			document.getElementById(tipo+'Estado').value     = d.uf         || '';
+			showToast('Endereço preenchido!');
+		})
+		.catch(() => showToast('Erro ao buscar CEP.', true))
+		.finally(() => { btn.innerHTML = '<i class="bi bi-search"></i>'; btn.disabled = false; });
+}
+
+function getAddrPayload(tipo) {
+	const dif = document.getElementById(tipo+'EnderecoDif').checked;
+	if (!dif) return null;
+	return {
+		cep:         document.getElementById(tipo+'Cep').value         || null,
+		logradouro:  document.getElementById(tipo+'Logradouro').value  || null,
+		numero:      document.getElementById(tipo+'Numero').value       || null,
+		complemento: document.getElementById(tipo+'Complemento').value || null,
+		bairro:      document.getElementById(tipo+'Bairro').value      || null,
+		cidade:      document.getElementById(tipo+'Cidade').value      || null,
+		estado:      document.getElementById(tipo+'Estado').value      || null,
+	};
+}
+
+function getAddrTutor(){
+	return{
+		logradouro: tutorAddrCache.logradouro, 
+		numero: tutorAddrCache.numero,
+		complemento: tutorAddrCache.complemento,
+		bairro: tutorAddrCache.bairro,
+		cidade: tutorAddrCache.cidade, 
+		estado: tutorAddrCache.estado, 
+		cep: tutorAddrCache.cep
+	}
+}
+
+function getEntregaPayload() {
+	if (!entregaState.busca && !entregaState.entrega) return null;
+	return {
+		busca:            entregaState.busca,
+		entrega:          entregaState.entrega,
+		horario_busca:    entregaState.busca   ? (document.getElementById('horarioBusca').value   || null) : null,
+		horario_entrega:  entregaState.entrega ? (document.getElementById('horarioEntrega').value  || null) : null,
+		obs_busca:        entregaState.busca   ? (document.getElementById('obsAcessoBusca').value  || null) : null,
+		obs_entrega:      entregaState.entrega ? (document.getElementById('obsAcessoEntrega').value|| null) : null,
+		addr_busca:       entregaState.busca   ? getAddrPayload('busca')   : null,
+		addr_entrega:     entregaState.entrega ? getAddrPayload('entrega') : null,
+		addr_tutor:     entregaState.entrega || entregaState.busca ? getAddrTutor() : null,
+	};
+}
+
+document.getElementById('agTutor').addEventListener('change', () => {
+	const id = document.getElementById('agTutor').value;
+	tutorAddrCache = null;
+	if (!id) { updateAddrPreviews(); return; }
+	fetch(API+'/tutores/'+id).then(r=>r.json()).then(t => {
+		tutorAddrCache = t.tutor;
+		updateAddrPreviews();
+	}).catch(()=>{});
+});
+
 let allAgendamentos = [];
 let activeFilter = 'todos';
 
@@ -269,7 +405,6 @@ async function fetchHistory(){
 	} catch { /* silently ignore */ }
 }
 
-// ── EDIT MODAL ──
 function openEdit(id){
 	const ag = allAgendamentos.find(a => (a.id||a.id_agendamento) == id);
 	if (!ag) return;
@@ -284,7 +419,6 @@ function openEdit(id){
 	document.getElementById('editModal').classList.remove('open');
 }
 
-// Fecha modal clicando fora
 document.getElementById('editModal').addEventListener('click', function(e){
 	if (e.target === this) closeModal();
 });
@@ -317,7 +451,6 @@ async function saveEdit(){
 	}
 }
 
-// ── DELETE ──
 async function deleteAg(id){
 	if (!confirm('Remover este agendamento?')) return;
 	try {
@@ -330,6 +463,5 @@ async function deleteAg(id){
 	}
 }
 
-// ── Init ──
 loadTutores();
 fetchHistory();
